@@ -143,7 +143,7 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
 
     team.forEach(unit => {
       if (!unit) return;
-      totalGems += unit.gems;
+      totalGems += (unit.gems === -1 ? 0 : unit.gems);
       placeCost += unit.placeCost;
 
       if (unit.upgrades && unit.upgrades.length > 0) {
@@ -217,9 +217,17 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
     };
 
     if (sortBy === "gems_desc") {
-      list.sort((a, b) => b.gems - a.gems);
+      list.sort((a, b) => {
+        const valA = a.gems === -1 ? -Infinity : a.gems;
+        const valB = b.gems === -1 ? -Infinity : b.gems;
+        return valB - valA;
+      });
     } else if (sortBy === "gems_asc") {
-      list.sort((a, b) => a.gems - b.gems);
+      list.sort((a, b) => {
+        const valA = a.gems === -1 ? Infinity : a.gems;
+        const valB = b.gems === -1 ? Infinity : b.gems;
+        return valA - valB;
+      });
     } else if (sortBy === "name") {
       list.sort((a, b) => a.name.localeCompare(b.name));
     } else {
@@ -227,7 +235,9 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
         const rA = getRarityIndex(a.rarity);
         const rB = getRarityIndex(b.rarity);
         if (rA !== rB) return rA - rB;
-        return a.gems - b.gems;
+        const valA = a.gems === -1 ? Infinity : a.gems;
+        const valB = b.gems === -1 ? Infinity : b.gems;
+        return valA - valB;
       });
     }
     return list;
@@ -368,15 +378,27 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
             <div className="flex justify-between items-center gap-2">
               <span className="text-slate-400 text-xs">Market Value:</span>
               <div className="flex items-center gap-1.5">
-                {u1.gems > u2.gems && <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">+{Math.abs(u1.gems - u2.gems).toLocaleString()}</span>}
-                <span className={`font-mono font-black ${getComparisonClass(u1.gems, u2.gems)}`}>💎 {u1.gems.toLocaleString()}</span>
+                {u1.gems !== -1 && u2.gems !== -1 && u1.gems > u2.gems && (
+                  <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">
+                    +{Math.abs(u1.gems - u2.gems).toLocaleString()}
+                  </span>
+                )}
+                <span className={`font-mono font-black ${u1.gems === -1 || u2.gems === -1 ? "text-slate-300" : getComparisonClass(u1.gems, u2.gems)}`}>
+                  {u1.gems === -1 ? "N/A" : `💎 ${u1.gems.toLocaleString()}`}
+                </span>
               </div>
             </div>
             <div className="flex justify-between items-center gap-2">
               <span className="text-slate-400 text-xs">Demand:</span>
               <div className="flex items-center gap-1.5">
-                {u1.demand > u2.demand && <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">+{Math.abs(u1.demand - u2.demand)}</span>}
-                <span className={`font-mono font-black ${getComparisonClass(u1.demand, u2.demand)}`}>{u1.demand}/10</span>
+                {u1.demand !== -1 && u2.demand !== -1 && u1.demand > u2.demand && (
+                  <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">
+                    +{Math.abs(u1.demand - u2.demand)}
+                  </span>
+                )}
+                <span className={`font-mono font-black ${u1.demand === -1 || u2.demand === -1 ? "text-slate-300" : getComparisonClass(u1.demand, u2.demand)}`}>
+                  {u1.demand === -1 ? "N/A" : `${u1.demand}/10`}
+                </span>
               </div>
             </div>
             <div className="flex justify-between items-center">
@@ -439,15 +461,27 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
             <div className="flex justify-between items-center gap-2">
               <span className="text-slate-400 text-xs">Market Value:</span>
               <div className="flex items-center gap-1.5">
-                {u2.gems > u1.gems && <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">+{Math.abs(u2.gems - u1.gems).toLocaleString()}</span>}
-                <span className={`font-mono font-black ${getComparisonClass(u2.gems, u1.gems)}`}>💎 {u2.gems.toLocaleString()}</span>
+                {u1.gems !== -1 && u2.gems !== -1 && u2.gems > u1.gems && (
+                  <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">
+                    +{Math.abs(u2.gems - u1.gems).toLocaleString()}
+                  </span>
+                )}
+                <span className={`font-mono font-black ${u1.gems === -1 || u2.gems === -1 ? "text-slate-300" : getComparisonClass(u2.gems, u1.gems)}`}>
+                  {u2.gems === -1 ? "N/A" : `💎 ${u2.gems.toLocaleString()}`}
+                </span>
               </div>
             </div>
             <div className="flex justify-between items-center gap-2">
               <span className="text-slate-400 text-xs">Demand:</span>
               <div className="flex items-center gap-1.5">
-                {u2.demand > u1.demand && <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">+{Math.abs(u2.demand - u1.demand)}</span>}
-                <span className={`font-mono font-black ${getComparisonClass(u2.demand, u1.demand)}`}>{u2.demand}/10</span>
+                {u1.demand !== -1 && u2.demand !== -1 && u2.demand > u1.demand && (
+                  <span className="text-[8px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded flex items-center gap-0.5 shrink-0 select-none">
+                    +{Math.abs(u2.demand - u1.demand)}
+                  </span>
+                )}
+                <span className={`font-mono font-black ${u1.demand === -1 || u2.demand === -1 ? "text-slate-300" : getComparisonClass(u2.demand, u1.demand)}`}>
+                  {u2.demand === -1 ? "N/A" : `${u2.demand}/10`}
+                </span>
               </div>
             </div>
             <div className="flex justify-between items-center">
@@ -853,11 +887,15 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                   <div className="flex flex-col gap-3 bg-white/[0.01] p-4 rounded-xl border border-white/5 w-full text-xs">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">Value:</span>
-                      <span className="font-mono font-black text-cyan-400">💎 {detailUnit.gems.toLocaleString()} Gems</span>
+                      <span className="font-mono font-black text-cyan-400">
+                        {detailUnit.gems === -1 ? "N/A" : `💎 ${detailUnit.gems.toLocaleString()} Gems`}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">Demand:</span>
-                      <span className="font-extrabold text-white">{detailUnit.demand}/10</span>
+                      <span className="font-extrabold text-white">
+                        {detailUnit.demand === -1 ? "N/A" : `${detailUnit.demand}/10`}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">Status:</span>
@@ -893,7 +931,9 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                           <div className="min-w-0 w-full">
                             <h5 className="font-extrabold text-white text-[11px] leading-tight truncate group-hover:text-blue-400 transition-colors">{drop.name}</h5>
                             <span className="text-[8px] font-black uppercase tracking-wider text-rose-400 block mt-0.5">{drop.rarity}</span>
-                            <span className="font-mono text-[9px] font-black text-cyan-400 block mt-1">💎 {drop.gems.toLocaleString()} Gems</span>
+                            <span className="font-mono text-[9px] font-black text-cyan-400 block mt-1">
+                              {drop.gems === -1 ? "N/A" : `💎 ${drop.gems.toLocaleString()} Gems`}
+                            </span>
                             <div className="mt-3 w-full bg-white/5 h-1.5 rounded-full overflow-hidden p-[1px] border border-white/[0.03]">
                               <div className={`h-full rounded-full ${drop.barColor}`} style={{ width: `${Math.max(3, drop.chanceNum)}%` }} />
                             </div>

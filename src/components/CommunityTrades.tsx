@@ -332,7 +332,9 @@ export default function CommunityTrades({ units: propUnits, signatures: propSign
       const rA = getRarityIndex(a.rarity);
       const rB = getRarityIndex(b.rarity);
       if (rA !== rB) return rA - rB;
-      return a.gems - b.gems;
+      const valA = a.gems === -1 ? Infinity : a.gems;
+      const valB = b.gems === -1 ? Infinity : b.gems;
+      return valA - valB;
     });
   }, [pickerSearchQuery, pickerRarityFilter, units]);
 
@@ -2224,7 +2226,7 @@ ${JSON.stringify(payload)}`;
                     <div className="border border-white/5 flex justify-between items-center bg-black/25 px-4 py-3 rounded-2xl">
                       <span className="text-slate-400 font-extrabold text-xs uppercase tracking-wider">Total Value:</span>
                       <span className="font-mono text-lg font-black text-zinc-100">
-                        💎 {Math.round(yourOfferGems + yourOfferItems.reduce((acc, item) => acc + (item.unit?.gems || 0) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
+                        💎 {Math.round(yourOfferGems + yourOfferItems.reduce((acc, item) => acc + (item.unit?.gems === -1 ? 0 : (item.unit?.gems || 0)) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -2369,7 +2371,7 @@ ${JSON.stringify(payload)}`;
                     <div className="border border-white/5 flex justify-between items-center bg-black/25 px-4 py-3 rounded-2xl">
                       <span className="text-slate-400 font-extrabold text-xs uppercase tracking-wider">Total Value:</span>
                       <span className="font-mono text-lg font-black text-zinc-100">
-                        💎 {Math.round(theirOfferGems + theirOfferItems.reduce((acc, item) => acc + (item.unit?.gems || 0) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
+                        💎 {Math.round(theirOfferGems + theirOfferItems.reduce((acc, item) => acc + (item.unit?.gems === -1 ? 0 : (item.unit?.gems || 0)) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -2559,7 +2561,7 @@ ${JSON.stringify(payload)}`;
                       <div className="border border-white/5 flex justify-between items-center bg-black/35 px-4 py-2.5 rounded-xl mt-auto">
                         <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Total Value:</span>
                         <span className="font-mono text-base font-black text-cyan-400">
-                          💎 {Math.round(dmYourOfferGems + dmYourOfferItems.reduce((acc, item) => acc + (item.unit?.gems || 0) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
+                          💎 {Math.round(dmYourOfferGems + dmYourOfferItems.reduce((acc, item) => acc + (item.unit?.gems === -1 ? 0 : (item.unit?.gems || 0)) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -2702,7 +2704,7 @@ ${JSON.stringify(payload)}`;
                       <div className="border border-white/5 flex justify-between items-center bg-black/35 px-4 py-2.5 rounded-xl mt-auto">
                         <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Total Value:</span>
                         <span className="font-mono text-base font-black text-cyan-400">
-                          💎 {Math.round(dmTheirOfferGems + dmTheirOfferItems.reduce((acc, item) => acc + (item.unit?.gems || 0) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
+                          💎 {Math.round(dmTheirOfferGems + dmTheirOfferItems.reduce((acc, item) => acc + (item.unit?.gems === -1 ? 0 : (item.unit?.gems || 0)) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -2905,7 +2907,7 @@ ${JSON.stringify(payload)}`;
                       <div className="border border-white/5 flex justify-between items-center bg-black/35 px-4 py-2.5 rounded-xl mt-auto">
                         <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Total Value:</span>
                         <span className="font-mono text-base font-black text-zinc-300">
-                          💎 {Math.round(coYourOfferGems + coYourOfferItems.reduce((acc, item) => acc + (item.unit?.gems || 0) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
+                          💎 {Math.round(coYourOfferGems + coYourOfferItems.reduce((acc, item) => acc + (item.unit?.gems === -1 ? 0 : (item.unit?.gems || 0)) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -3054,7 +3056,7 @@ ${JSON.stringify(payload)}`;
                       <div className="border border-white/5 flex justify-between items-center bg-black/35 px-4 py-2.5 rounded-xl mt-auto">
                         <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Total Value:</span>
                         <span className="font-mono text-base font-black text-cyan-400">
-                          💎 {Math.round(coTheirOfferGems + coTheirOfferItems.reduce((acc, item) => acc + (item.unit?.gems || 0) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
+                          💎 {Math.round(coTheirOfferGems + coTheirOfferItems.reduce((acc, item) => acc + (item.unit?.gems === -1 ? 0 : (item.unit?.gems || 0)) * (1 + (item.sign?.percent || 0) / 100) * item.qty, 0)).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -3191,7 +3193,7 @@ ${JSON.stringify(payload)}`;
                         <div className="min-w-0 flex-1">
                           <div className="text-[10.5px] font-extrabold text-white leading-tight truncate w-full">{unit.name}</div>
                           <div className="flex gap-1 items-center mt-0.5">
-                            <span className="text-[9px] font-black text-cyan-400 font-mono">💎 {unit.gems.toLocaleString()}</span>
+                            <span className="text-[9px] font-black text-cyan-400 font-mono">{unit.gems === -1 ? "N/A" : `💎 ${unit.gems.toLocaleString()}`}</span>
                           </div>
                         </div>
                       </button>
@@ -3339,7 +3341,7 @@ ${JSON.stringify(payload)}`;
               </div>
 
               <div className="bg-white/10 border border-white/20 p-3 rounded-xl text-center text-xs font-black text-white font-mono tracking-wide shadow-sm">
-                Combined Value: 💎 {Math.round(pickerSelectedUnit.gems * (1 + pickerSelectedSign.percent / 100) * (Number(pickerSelectedQty) || 1)).toLocaleString()}
+                Combined Value: {pickerSelectedUnit.gems === -1 ? "N/A" : `💎 ${Math.round(pickerSelectedUnit.gems * (1 + pickerSelectedSign.percent / 100) * (Number(pickerSelectedQty) || 1)).toLocaleString()}`}
               </div>
 
               <button

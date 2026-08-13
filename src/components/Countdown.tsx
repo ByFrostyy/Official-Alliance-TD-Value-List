@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Flame, Hourglass, Sparkles, Calendar } from "lucide-react";
+import { Flame, Hourglass, Sparkles, Calendar, Timer } from "lucide-react";
 import { CountdownConfig } from "../types";
 
 interface CountdownProps {
@@ -168,24 +168,47 @@ export default function Countdown({ config: propConfig }: CountdownProps) {
         </div>
       )}
 
-      {/* Timer Cards */}
-      <div className="flex justify-center flex-wrap gap-3 sm:gap-5 w-full max-w-2xl">
-        {countdownUnits.map((unit, index) => (
-          <motion.div
-            key={unit.label}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: index * 0.1, type: "spring" }}
-            className="flex-1 min-w-[80px] sm:min-w-[110px] bg-black/70 border border-white/10 rounded-2xl py-4 sm:py-6 px-4 text-center shadow-lg relative overflow-hidden"
-          >
-            <span className="block text-3xl sm:text-5xl font-black tracking-tight text-white mb-1 font-mono">
-              {formatUnit(unit.value)}
-            </span>
-            <span className="block text-[10px] sm:text-xs font-black uppercase text-slate-400 tracking-wider font-mono">
-              {unit.label}
-            </span>
-          </motion.div>
-        ))}
+      {/* Timer Cards with Stopwatch Icons on Left and Right */}
+      <div className="flex items-center justify-center gap-3 sm:gap-6 w-full max-w-4xl px-4">
+        {/* Left Stopwatch Decorative Element */}
+        <motion.div 
+          initial={{ scale: 0.8, rotate: -15, opacity: 0 }}
+          animate={{ scale: 1, rotate: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          className="flex items-center justify-center p-2.5 sm:p-4 bg-orange-500/10 border border-orange-500/30 rounded-full text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.15)] shrink-0 animate-pulse"
+        >
+          <Timer className="w-6 h-6 sm:w-11 sm:h-11 animate-spin" style={{ animationDuration: "10s" }} />
+        </motion.div>
+
+        {/* Timer Cards */}
+        <div className="flex justify-center flex-wrap gap-2.5 sm:gap-4 flex-1 max-w-xl">
+          {countdownUnits.map((unit, index) => (
+            <motion.div
+              key={unit.label}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.1, type: "spring" }}
+              className="flex-1 min-w-[65px] sm:min-w-[105px] bg-black/80 border border-white/15 rounded-2xl py-3.5 sm:py-5 px-1.5 sm:px-3 text-center shadow-lg relative overflow-hidden backdrop-blur-md"
+            >
+              <span className="block text-xl sm:text-4xl font-black tracking-tight text-white mb-0.5 sm:mb-1 font-mono">
+                {formatUnit(unit.value)}
+              </span>
+              <span className="block text-[8px] sm:text-[10px] font-black uppercase text-slate-400 tracking-wider font-mono">
+                {unit.label}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Right Stopwatch Decorative Element */}
+        <motion.div 
+          initial={{ scale: 0.8, rotate: 15, opacity: 0 }}
+          animate={{ scale: 1, rotate: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          className="flex items-center justify-center p-2.5 sm:p-4 bg-orange-500/10 border border-orange-500/30 rounded-full text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.15)] shrink-0 animate-pulse"
+        >
+          <Timer className="w-6 h-6 sm:w-11 sm:h-11 animate-spin" style={{ animationDuration: "10s", animationDelay: "0.5s" }} />
+        </motion.div>
       </div>
     </div>
   );

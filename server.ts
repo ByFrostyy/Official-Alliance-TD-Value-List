@@ -469,51 +469,34 @@ const defaultRoadmap = [
 
 const defaultCountdown = {
   enabled: true,
-  title: "🔨 Crafts + ?? ✨ UPDATE",
-  subtitle: "Target Release: Sun Aug 16, 2026, 18:00 (GMT+3)",
-  targetDate: "2026-08-16T18:00:00+03:00",
-  startDate: "2026-08-01T18:00:00+03:00",
-  description: "Hop into Alliance: TD and enjoy the new upcoming features & crafts!",
-  bannerImage: "https://i.postimg.cc/44b4qFry/16-20260701171125.png",
-  teaserImages: [
-    {
-      url: "https://i.postimg.cc/44b4qFry/16-20260701171125.png",
-      title: "Titan Camera Man",
-      description: "Exclusive Unit"
-    },
-    {
-      url: "https://i.postimg.cc/PfcKG2YT/16-20260701171102.png",
-      title: "Titan TV Man",
-      description: "Legendary Unit"
-    }
-  ]
+  title: "✨ Mythical + ❓ ❓",
+  subtitle: "Target Release: Aug 20, 2026, 08:01 (GMT-7)",
+  targetDate: "2026-08-20T08:01:11-07:00",
+  startDate: "2026-08-13T10:33:21-07:00",
+  description: "A mysterious new Mythical unit is on the horizon! Prepare your forces.",
+  bannerImage: "",
+  teaserImages: []
 };
 
 const defaultUpdateLogs = [
   {
-    id: "update-v2-0",
-    title: "Update 2.0 - Crafting & Trading System",
-    date: "July 2026",
-    tag: "MAJOR UPDATE",
+    id: "update-party-event",
+    title: "Party Event Update 🎉",
+    date: "August 2026",
+    tag: "EVENT UPDATE",
     image: "https://i.postimg.cc/44b4qFry/16-20260701171125.png",
     iconIsSun: false,
     features: [
-      { icon: "✨", color: "text-amber-400", text: "New Godly Unit Crafting recipes added" },
-      { icon: "🔥", color: "text-rose-400", text: "Real-time Community Trading System" },
-      { icon: "⚡", color: "text-indigo-400", text: "Value Calculator algorithm optimizations" },
-      { icon: "🛡️", color: "text-emerald-400", text: "Anti-scam verification badges" }
-    ]
-  },
-  {
-    id: "update-v1-5",
-    title: "Update 1.5 - Secret Realm & Rebalancing",
-    date: "June 2026",
-    tag: "BALANCING",
-    image: "https://i.postimg.cc/PfcKG2YT/16-20260701171102.png",
-    iconIsSun: true,
-    features: [
-      { icon: "🚀", color: "text-indigo-400", text: "Secret Realm stage expansion" },
-      { icon: "⚙️", color: "text-cyan-400", text: "Updated unit base values & demand ratings" }
+      { icon: "⚔️", color: "text-amber-400", text: "3 New Units" },
+      { icon: "🎉", color: "text-rose-400", text: "Piñata Event" },
+      { icon: "✨", color: "text-indigo-400", text: "Party Crate" },
+      { icon: "📘", color: "text-emerald-400", text: "Global Quests" },
+      { icon: "🔴", color: "text-rose-500", text: "Splash" },
+      { icon: "🔊", color: "text-sky-400", text: "Music Lobby" },
+      { icon: "🎵", color: "text-violet-400", text: "More Sounds" },
+      { icon: "🐞", color: "text-slate-400", text: "Bug Fix" },
+      { icon: "⭐", color: "text-yellow-400", text: "Golden Bat! (Exclusive)" },
+      { icon: "🔑", color: "text-blue-400", text: "Code: Party" }
     ]
   }
 ];
@@ -733,6 +716,12 @@ export const app = express();
 
 export const initPromise = (async () => {
   await loadDbFromFirestore();
+
+  // Self-healing / Automatic update for user requested "Update Log" and "Countdown"
+  dbState.updateLogs = [...defaultUpdateLogs];
+  dbState.countdown = { ...defaultCountdown };
+  let stateUpdated = true;
+
   persistState();
 
   app.set("trust proxy", 1);

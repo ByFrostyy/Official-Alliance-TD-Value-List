@@ -177,7 +177,8 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
     } else {
       yourOffer.forEach(item => {
         const signText = item.sign.name !== "None" ? ` (Signature: ${item.sign.name})` : "";
-        text += `• ${item.qty}x **${item.unit.name}**${signText} (💎 ${(item.unit.gems * (1 + item.sign.percent / 100)).toLocaleString("en-US")} each)\n`;
+        const eachGemsText = item.unit.gems === -1 ? "N/A" : `💎 ${(item.unit.gems * (1 + item.sign.percent / 100)).toLocaleString("en-US")}`;
+        text += `• ${item.qty}x **${item.unit.name}**${signText} (${eachGemsText} each)\n`;
       });
       if (yourGems > 0) {
         text += `• 💰 **${yourGems.toLocaleString("en-US")}** Gems\n`;
@@ -191,7 +192,8 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
     } else {
       theirOffer.forEach(item => {
         const signText = item.sign.name !== "None" ? ` (Signature: ${item.sign.name})` : "";
-        text += `• ${item.qty}x **${item.unit.name}**${signText} (💎 ${(item.unit.gems * (1 + item.sign.percent / 100)).toLocaleString("en-US")} each)\n`;
+        const eachGemsText = item.unit.gems === -1 ? "N/A" : `💎 ${(item.unit.gems * (1 + item.sign.percent / 100)).toLocaleString("en-US")}`;
+        text += `• ${item.qty}x **${item.unit.name}**${signText} (${eachGemsText} each)\n`;
       });
       if (theirGems > 0) {
         text += `• 💰 **${theirGems.toLocaleString("en-US")}** Gems\n`;
@@ -223,7 +225,8 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
   const calculateTotal = (offer: { unit: Unit; sign: SignValue; qty: number }[], gems: number) => {
     return offer.reduce((sum, item) => {
       const signMultiplier = 1 + item.sign.percent / 100;
-      return sum + Math.round(item.unit.gems * signMultiplier) * item.qty;
+      const baseGems = item.unit.gems === -1 ? 0 : item.unit.gems;
+      return sum + Math.round(baseGems * signMultiplier) * item.qty;
     }, 0) + gems;
   };
 
@@ -479,9 +482,17 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
     };
 
     if (sortOption === "price-desc") {
-      list.sort((a, b) => b.gems - a.gems);
+      list.sort((a, b) => {
+        const valA = a.gems === -1 ? -Infinity : a.gems;
+        const valB = b.gems === -1 ? -Infinity : b.gems;
+        return valB - valA;
+      });
     } else if (sortOption === "price-asc") {
-      list.sort((a, b) => a.gems - b.gems);
+      list.sort((a, b) => {
+        const valA = a.gems === -1 ? Infinity : a.gems;
+        const valB = b.gems === -1 ? Infinity : b.gems;
+        return valA - valB;
+      });
     } else if (sortOption === "demand-desc") {
       list.sort((a, b) => b.demand - a.demand);
     } else {
@@ -489,7 +500,9 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
         const rA = getRarityIndex(a.rarity);
         const rB = getRarityIndex(b.rarity);
         if (rA !== rB) return rA - rB;
-        return a.gems - b.gems;
+        const valA = a.gems === -1 ? Infinity : a.gems;
+        const valB = b.gems === -1 ? Infinity : b.gems;
+        return valA - valB;
       });
     }
     return list;
@@ -497,7 +510,7 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
 
   const singleUnitCombinedValue = useMemo(() => {
     if (!activeConfigUnit) return 0;
-    const baseValue = activeConfigUnit.gems;
+    const baseValue = activeConfigUnit.gems === -1 ? 0 : activeConfigUnit.gems;
     const signBoostMultiplier = 1 + configSign.percent / 100;
     return Math.round(baseValue * signBoostMultiplier);
   }, [activeConfigUnit, configSign]);
@@ -1103,7 +1116,7 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
                             >
                               {unit.rarity}
                             </span>
-                            <span className="text-[9px] font-black text-cyan-400 font-mono">💎 {unit.gems.toLocaleString()}</span>
+                            <span className="text-[9px] font-black text-cyan-400 font-mono">{unit.gems === -1 ? "N/A" : `💎 ${unit.gems.toLocaleString()}`}</span>
                           </div>
                         </div>
                       </button>
@@ -1242,7 +1255,7 @@ export default function TradeCalculator({ units: propUnits, signatures: propSign
               </div>
 
               <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-center text-xs font-black text-blue-400 font-mono tracking-wide shadow-[0_2px_12px_rgba(59,130,246,0.05),inset_0_1px_2px_rgba(59,130,246,0.1)]">
-                💎 Value: {(singleUnitCombinedValue * (Number(configQty) || 1)).toLocaleString()}
+                💎 Value: {activeConfigUnit?.gems === -1 ? "N/A" : (singleUnitCombinedValue * (Number(configQty) || 1)).toLocaleString()}
               </div>
 
               <button

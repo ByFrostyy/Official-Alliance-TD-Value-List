@@ -13,190 +13,264 @@ export const Yl: Unit[] = [
     placeCost: 100,
     obtain: "Summon (50%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($100)", dmg: 8, cd: 0.8, range: 12 },
-      { lvl: 2, cost: "$75", dmg: 12, cd: 0.75, range: 12 },
-      { lvl: 3, cost: "$100", dmg: 17, cd: 0.7, range: 13 },
-      { lvl: 4, cost: "$125", dmg: 25, cd: 0.65, range: 14 }
+      { lvl: 1, cost: "Place ($100)", dmg: 9, cd: 0.75, range: 12 },
+      { lvl: 2, cost: "Max Lvl", dmg: 30, cd: 0.65, range: 14 }
     ]
   },
   {
     name: "Camera Man",
     rarity: "Uncommon",
     img: "https://i.postimg.cc/RVpmzrGv/16-20260626163759.png",
-    gems: 1,
-    tokenValue: "1",
-    shinyValue: "2",
-    demand: 7,
+    gems: 0,
+    tokenValue: "0",
+    shinyValue: "0",
+    demand: 0,
     stability: "Underpaid",
-    placeCost: 150,
+    placeCost: 100,
     obtain: "Summon (35%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($150)", dmg: 15, cd: 1.25, range: 16 },
-      { lvl: 2, cost: "$125", dmg: 23, cd: 1.2, range: 17 },
-      { lvl: 3, cost: "$175", dmg: 33, cd: 1.15, range: 18 },
-      { lvl: 4, cost: "$250", dmg: 48, cd: 1.1, range: 20 }
+      { lvl: 1, cost: "Place ($100)", dmg: 25, cd: 1.25, range: 16 },
+      { lvl: 2, cost: "Max Lvl", dmg: 60, cd: 1, range: 20 }
     ]
   },
   {
     name: "TV Man",
     rarity: "Rare",
     img: "https://i.postimg.cc/SxGvpcmC/16-20260701170954.png",
-    gems: 5,
-    tokenValue: "5",
-    shinyValue: "10",
-    demand: 3,
-    stability: "Dropping",
-    placeCost: 250,
+    gems: 1,
+    tokenValue: "1",
+    shinyValue: "2",
+    demand: 1,
+    stability: "Underpaid",
+    placeCost: 200,
     obtain: "Summon (10%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($250)", dmg: 10, cd: 1.4, range: 12 },
-      { lvl: 2, cost: "$200", dmg: 16, cd: 1.3, range: 13 },
-      { lvl: 3, cost: "$300", dmg: 24, cd: 1.15, range: 14 },
-      { lvl: 4, cost: "$450", dmg: 36, cd: 1, range: 15 }
+      { lvl: 1, cost: "Place ($200)", dmg: 32, cd: 1, range: 14 },
+      { lvl: 2, cost: "Max Lvl", dmg: 72, cd: 0.8, range: 18 }
     ]
   },
   {
     name: "Large Speaker Man",
     rarity: "Rare",
     img: "https://i.postimg.cc/KvwWNmJN/16-20260701170927.png",
-    gems: 7,
-    tokenValue: "7",
-    shinyValue: "14",
-    demand: 4,
-    stability: "Stable",
-    placeCost: 500,
+    gems: 2,
+    tokenValue: "2",
+    shinyValue: "4",
+    demand: 1,
+    stability: "Underpaid",
+    placeCost: 250,
     obtain: "Summon (10%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($500)", dmg: 27, cd: 0.6, range: 14 },
-      { lvl: 2, cost: "$350", dmg: 42, cd: 0.56, range: 14 },
-      { lvl: 3, cost: "$500", dmg: 60, cd: 0.52, range: 15 },
-      { lvl: 4, cost: "$700", dmg: 85, cd: 0.48, range: 16 }
+      { lvl: 1, cost: "Place ($250)", dmg: 50, cd: 0.72, range: 14 },
+      { lvl: 2, cost: "Max Lvl", dmg: 92, cd: 0.66, range: 16 }
     ]
   },
   {
     name: "Camera Woman",
     rarity: "Rare",
     img: "https://i.postimg.cc/xTZ8KbSp/b3b08a564fce292a.png",
-    gems: 33,
-    tokenValue: "33",
-    shinyValue: "66",
-    demand: 8,
+    gems: 20,
+    tokenValue: "20",
+    shinyValue: "40",
+    demand: 6,
     stability: "Dropping",
     placeCost: 150,
     obtain: "Summon (10%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($150)", dmg: 50, cd: 1.9, range: 18 },
-      { lvl: 2, cost: "$300", dmg: 70, cd: 1.85, range: 19 },
-      { lvl: 3, cost: "$450", dmg: 105, cd: 1.80, range: 21 },
-      { lvl: 4, cost: "$650", dmg: 150, cd: 1.75, range: 22 }
+      { lvl: 1, cost: "Place ($150)", dmg: 48, cd: 1.2, range: 18 },
+      { lvl: 2, cost: "Max Lvl", dmg: 95, cd: 1, range: 22 }
     ]
   },
   {
     name: "Large Camera Man",
     rarity: "Epic",
     img: "https://i.postimg.cc/5t1n7yvw/16-20260701171037.png",
-    gems: 15,
-    tokenValue: "15",
-    shinyValue: "30",
-    demand: 9,
-    stability: "Stable",
-    placeCost: 650,
+    gems: 7,
+    tokenValue: "7",
+    shinyValue: "14",
+    demand: 1,
+    stability: "Underpaid",
+    placeCost: 450,
     obtain: "Summon (4%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($650)", dmg: 70, cd: 1.4, range: 9 },
-      { lvl: 2, cost: "$550", dmg: 110, cd: 1.35, range: 9 },
-      { lvl: 3, cost: "$700", dmg: 170, cd: 1.25, range: 10 },
-      { lvl: 4, cost: "$900", dmg: 240, cd: 1.15, range: 11 }
+      { lvl: 1, cost: "Place ($450)", dmg: 133, cd: 1.4, range: 9 },
+      { lvl: 2, cost: "Max Lvl", dmg: 385, cd: 1.1, range: 11 }
     ]
   },
   {
     name: "Large TV Man",
     rarity: "Epic",
     img: "https://i.postimg.cc/Rh3R6HrD/16-20260628175643.png",
-    gems: 30,
-    tokenValue: "30",
-    shinyValue: "60",
-    demand: 5,
-    stability: "Stable",
-    placeCost: 750,
+    gems: 10,
+    tokenValue: "10",
+    shinyValue: "20",
+    demand: 1,
+    stability: "Underpaid",
+    placeCost: 350,
     obtain: "Summon (4%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($750)", dmg: 32, cd: 1.2, range: 14 },
-      { lvl: 2, cost: "$650", dmg: 50, cd: 1.1, range: 15 },
-      { lvl: 3, cost: "$850", dmg: 75, cd: 1, range: 16 },
-      { lvl: 4, cost: "$1100", dmg: 110, cd: 0.9, range: 17 }
+      { lvl: 1, cost: "Place ($350)", dmg: 63, cd: 1.25, range: 14 },
+      { lvl: 2, cost: "Max Lvl", dmg: 155, cd: 1, range: 17 }
     ]
   },
   {
     name: "Plunger Camera Man",
     rarity: "Epic",
     img: "https://i.postimg.cc/3N5T0swc/plunger.png",
-    gems: 40,
-    tokenValue: "40",
-    shinyValue: "80",
-    demand: 9,
+    gems: 30,
+    tokenValue: "30",
+    shinyValue: "60",
+    demand: 6,
     stability: "Dropping",
-    placeCost: 650,
+    placeCost: 250,
     obtain: "Summon (4%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($650)", dmg: 44, cd: 0.8, range: 13 },
-      { lvl: 2, cost: "$550", dmg: 70, cd: 0.75, range: 14 },
-      { lvl: 3, cost: "$750", dmg: 100, cd: 0.7, range: 15 },
-      { lvl: 4, cost: "$1000", dmg: 125, cd: 0.66, range: 16 }
+      { lvl: 1, cost: "Place ($250)", dmg: 72, cd: 0.8, range: 13 },
+      { lvl: 2, cost: "Max Lvl", dmg: 165, cd: 0.66, range: 16 }
     ]
   },
   {
     name: "Titan Speaker Man",
     rarity: "Legendary",
     img: "https://i.postimg.cc/KYZD7VSk/16-20260701171144.png",
-    gems: 350,
-    tokenValue: "350",
-    shinyValue: "700",
+    gems: 310,
+    tokenValue: "310",
+    shinyValue: "620",
     demand: 7,
     stability: "Underpaid",
     placeCost: 1200,
     obtain: "Summon (1%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($1200)", dmg: 70, cd: 0.45, range: 16 },
-      { lvl: 2, cost: "$900", dmg: 110, cd: 0.42, range: 17 },
-      { lvl: 3, cost: "$1200", dmg: 165, cd: 0.39, range: 18 },
-      { lvl: 4, cost: "$1600", dmg: 240, cd: 0.36, range: 19 }
+      { lvl: 1, cost: "Place ($1200)", dmg: 85, cd: 0.5, range: 18 },
+      { lvl: 2, cost: "Max Lvl", dmg: 200, cd: 0.42, range: 22 }
     ]
   },
   {
     name: "Titan TV Man",
     rarity: "Legendary",
     img: "https://i.postimg.cc/PfcKG2YT/16-20260701171102.png",
-    gems: 450,
-    tokenValue: "450",
-    shinyValue: "900",
+    gems: 340,
+    tokenValue: "340",
+    shinyValue: "680",
     demand: 9,
     stability: "Underpaid",
     placeCost: 2000,
     obtain: "Summon (1%)",
     upgrades: [
-      { lvl: 1, cost: "Place ($2000)", dmg: 80, cd: 0.85, range: 16 },
-      { lvl: 2, cost: "$1400", dmg: 125, cd: 0.8, range: 17 },
-      { lvl: 3, cost: "$1900", dmg: 190, cd: 0.75, range: 18 },
-      { lvl: 4, cost: "$2500", dmg: 280, cd: 0.7, range: 19 }
+      { lvl: 1, cost: "Place ($2000)", dmg: 20, cd: 0.3, range: 16 },
+      { lvl: 2, cost: "Max Lvl", dmg: 28, cd: 0.1, range: 19 }
     ]
   },
   {
     name: "Titan Camera Man",
     rarity: "Exclusive",
     img: "https://i.postimg.cc/44b4qFry/16-20260701171125.png",
-    gems: 2000,
-    tokenValue: "2,000",
-    shinyValue: "4,000",
+    gems: 2500,
+    tokenValue: "2,500",
+    shinyValue: "5,000",
     demand: 10,
     stability: "Hyped",
-    placeCost: 1500,
+    placeCost: 1400,
     obtain: "Summon (Exclusive)",
     upgrades: [
-      { lvl: 1, cost: "Place ($1500)", dmg: 250, cd: 1.8, range: 20 },
-      { lvl: 2, cost: "$1000", dmg: 400, cd: 1.7, range: 22 },
-      { lvl: 3, cost: "$1400", dmg: 620, cd: 1.6, range: 23 },
-      { lvl: 4, cost: "$1900", dmg: 950, cd: 1.5, range: 25 }
+      { lvl: 1, cost: "Place ($1400)", dmg: 220, cd: 1.6, range: 20 },
+      { lvl: 2, cost: "Max Lvl", dmg: 600, cd: 1.33, range: 25 }
+    ]
+  },
+  {
+    name: "Scientist Camera Man",
+    rarity: "Exclusive",
+    img: "https://i.postimg.cc/MGjsYrkV/dsadsad.png",
+    gems: 120,
+    tokenValue: "120",
+    shinyValue: "240",
+    demand: 10,
+    stability: "Fluctuating",
+    placeCost: 200,
+    obtain: "Exclusive",
+    upgrades: [
+      { lvl: 1, cost: "Place ($200)", income: 50, cd: 1, range: 0 },
+      { lvl: 2, cost: "Max Lvl", income: 600, cd: 1, range: 0 }
+    ]
+  },
+  {
+    name: "Large Scientist Camera Man",
+    rarity: "Exclusive",
+    img: "https://i.postimg.cc/BQqVGgFz/sdasa.png",
+    gems: 80,
+    tokenValue: "80",
+    shinyValue: "160",
+    demand: 4,
+    stability: "Fluctuating",
+    placeCost: 250,
+    obtain: "Exclusive",
+    upgrades: [
+      { lvl: 1, cost: "Place ($250)", dmg: 96, hp: 10, cd: 1, range: 15 },
+      { lvl: 2, cost: "Max Lvl", dmg: 220, hp: 55, cd: 0.88, range: 17 }
+    ]
+  },
+  {
+    name: "Engineer Camera Man",
+    rarity: "Exclusive",
+    img: "https://i.postimg.cc/902N0Pny/c4a50767ee15cdb9.png",
+    gems: 10000,
+    tokenValue: "10,000",
+    shinyValue: "20,000",
+    demand: 10,
+    stability: "Fluctuating",
+    placeCost: 250,
+    obtain: "Exclusive",
+    upgrades: [
+      { lvl: 1, cost: "Place ($250)", dmg: 0, cd: 15, range: 0 },
+      { lvl: 2, cost: "Max Lvl", dmg: 0, cd: 12, range: 0 }
+    ]
+  },
+  {
+    name: "Party Camera Man",
+    rarity: "Event",
+    img: "https://i.postimg.cc/76nnBFmQ/66b5c7bab6d6d110.png",
+    gems: -1,
+    tokenValue: "N/A",
+    shinyValue: "N/A",
+    demand: -1,
+    stability: "N/A",
+    placeCost: 125,
+    obtain: "Event",
+    upgrades: [
+      { lvl: 1, cost: "Place ($125)", dmg: 20, cd: 1.05, range: 8 },
+      { lvl: 2, cost: "Max Lvl", dmg: 50, cd: 0.82, range: 12 }
+    ]
+  },
+  {
+    name: "Jester Speaker Man",
+    rarity: "Event",
+    img: "https://i.postimg.cc/9FVvQ26x/6f38878d1806a413.png",
+    gems: -1,
+    tokenValue: "N/A",
+    shinyValue: "N/A",
+    demand: -1,
+    stability: "N/A",
+    placeCost: 250,
+    obtain: "Event",
+    upgrades: [
+      { lvl: 1, cost: "Place ($250)", dmg: 24, cd: 1.05, range: 14 },
+      { lvl: 2, cost: "Max Lvl", dmg: 72, cd: 0.72, range: 18 }
+    ]
+  },
+  {
+    name: "Party Titan TV Man",
+    rarity: "Event",
+    img: "https://i.postimg.cc/13RhJSMn/cd4eca2771f66a3b.png",
+    gems: -1,
+    tokenValue: "N/A",
+    shinyValue: "N/A",
+    demand: -1,
+    stability: "N/A",
+    placeCost: 1800,
+    obtain: "Event",
+    upgrades: [
+      { lvl: 1, cost: "Place ($1800)", dmg: 22, cd: 0.3, range: 16 },
+      { lvl: 2, cost: "Max Lvl", dmg: 31, cd: 0.1, range: 19 }
     ]
   }
 ];
@@ -218,7 +292,9 @@ export const sd: Staff[] = [
   { name: "DealerzinBr", role: "partner", sign: "DealerzinBr", percent: 15, avatar: "⭐" },
   { name: "Elfenix774", role: "partner", sign: "Elfenix774", percent: 25, avatar: "⭐" },
   { name: "GREENFN_KASH", role: "partner", sign: "GREENFN_KASH", percent: 15, avatar: "⭐" },
-  { name: "XMRSHADOW2", role: "partner", sign: "XMRSHADOW2", percent: 15, avatar: "⭐" }
+  { name: "XMRSHADOW2", role: "partner", sign: "XMRSHADOW2", percent: 15, avatar: "⭐" },
+  { name: "Notponryt", role: "partner", sign: "Notponryt", percent: 15, avatar: "⭐" },
+  { name: "FinishTimeTT", role: "partner", sign: "FinishTimeTT", percent: 15, avatar: "⭐" }
 ];
 
 export const wS = (roleStr: string) => {
@@ -274,7 +350,9 @@ export const Hl: SignValue[] = [
   { name: "DealerzinBr", percent: 15, role: "Partner", color: "#ef4444" },
   { name: "Elfenix774", percent: 25, role: "Partner", color: "#ef4444" },
   { name: "GREENFN_KASH", percent: 15, role: "Partner", color: "#ef4444" },
-  { name: "XMRSHADOW2", percent: 15, role: "Partner", color: "#ef4444" }
+  { name: "XMRSHADOW2", percent: 15, role: "Partner", color: "#ef4444" },
+  { name: "Notponryt", percent: 15, role: "Partner", color: "#ef4444" },
+  { name: "FinishTimeTT", percent: 15, role: "Partner", color: "#ef4444" }
 ];
 
 export const ug = [
@@ -288,6 +366,25 @@ export const ug = [
   { id: "owner", name: "Owners", class: "border-blue-500 text-blue-400" }
 ];
 
-export const Gl: UpdateLog[] = [];
-
-
+export const Gl: UpdateLog[] = [
+  {
+    id: "update-party-event",
+    title: "Party Event Update 🎉",
+    date: "August 2026",
+    tag: "EVENT UPDATE",
+    image: "https://i.postimg.cc/44b4qFry/16-20260701171125.png",
+    iconIsSun: false,
+    features: [
+      { icon: "⚔️", color: "text-amber-400", text: "3 New Units" },
+      { icon: "🎉", color: "text-rose-400", text: "Piñata Event" },
+      { icon: "✨", color: "text-indigo-400", text: "Party Crate" },
+      { icon: "📘", color: "text-emerald-400", text: "Global Quests" },
+      { icon: "🔴", color: "text-rose-500", text: "Splash" },
+      { icon: "🔊", color: "text-sky-400", text: "Music Lobby" },
+      { icon: "🎵", color: "text-violet-400", text: "More Sounds" },
+      { icon: "🐞", color: "text-slate-400", text: "Bug Fix" },
+      { icon: "⭐", color: "text-yellow-400", text: "Golden Bat! (Exclusive)" },
+      { icon: "🔑", color: "text-blue-400", text: "Code: Party" }
+    ]
+  }
+];
