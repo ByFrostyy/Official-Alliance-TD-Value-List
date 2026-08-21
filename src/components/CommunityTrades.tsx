@@ -705,11 +705,28 @@ ${JSON.stringify(payload)}`;
     try {
       const res = await fetch("/api/discord/oauth-start");
       const data = await res.json();
-      if (data.authUrl) {
-        // Open in a new tab to bypass cookie-check and third-party storage restrictions in popups
+      if (data.authUrl && data.state) {
         const win = window.open(data.authUrl, "_blank");
+
+        const pollInterval = setInterval(async () => {
+          try {
+            const pollRes = await fetch(`/api/discord/oauth-poll?state=${data.state}`);
+            if (pollRes.ok) {
+              const pollData = await pollRes.json();
+              if (pollData.completed && pollData.sessionToken) {
+                clearInterval(pollInterval);
+                setSessionToken(pollData.sessionToken);
+                localStorage.setItem("lttd_rb_session", pollData.sessionToken);
+                setDiscordUser(pollData.user);
+                setIsLoginModalOpen(false);
+                if (win && !win.closed) {
+                  try { win.close(); } catch(e){}
+                }
+              }
+            }
+          } catch {}
+        }, 700);
         
-        // Listen via postMessage
         const handler = (e: MessageEvent) => {
           if (e.data.type === "OAUTH_AUTH_SUCCESS") {
             const token = e.data.sessionToken;
@@ -717,25 +734,18 @@ ${JSON.stringify(payload)}`;
             localStorage.setItem("lttd_rb_session", token);
             setIsLoginModalOpen(false);
             window.removeEventListener("message", handler);
-            if (win) win.close();
+            clearInterval(pollInterval);
+            if (win && !win.closed) {
+              try { win.close(); } catch(e){}
+            }
           }
         };
         window.addEventListener("message", handler);
 
-        // Polling fallback
-        const interval = setInterval(() => {
-          const storedToken = localStorage.getItem("lttd_rb_session");
-          if (storedToken && storedToken.startsWith("session_oauth_")) {
-            setSessionToken(storedToken);
-            setIsLoginModalOpen(false);
-            window.removeEventListener("message", handler);
-            clearInterval(interval);
-            if (win) win.close();
-          }
-          if (win && win.closed) {
-            clearInterval(interval);
-          }
-        }, 1000);
+        setTimeout(() => {
+          clearInterval(pollInterval);
+          window.removeEventListener("message", handler);
+        }, 180000);
       } else if (data.error) {
         console.warn("Discord OAuth Configuration Error:", data.error);
       }

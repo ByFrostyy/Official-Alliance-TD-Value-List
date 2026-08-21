@@ -391,7 +391,7 @@ function logAdminAction(adminName: string, action: string, details: string) {
   if (adminAuditLogs.length > 200) adminAuditLogs.pop();
   persistState();
 }
-let maintenanceModeActive = dbState.maintenanceModeActive || false;
+let maintenanceModeActive = false;
 let globalMusicUrl = dbState.globalMusicUrl || "";
 let globalClickSoundUrl = dbState.globalClickSoundUrl || "";
 const demoUnitNames = new Set([
@@ -407,21 +407,22 @@ function cleanAndSyncUnits() {
     dbState.units = dbState.units.filter((u: any) => u && u.name && !demoUnitNames.has(u.name));
     defaultUnits.forEach(defUnit => {
       const idx = dbState.units.findIndex((u: any) => u.name === defUnit.name);
-      if (idx !== -1) {
-        dbState.units[idx] = {
-          ...dbState.units[idx],
-          gems: defUnit.gems,
-          tokenValue: defUnit.tokenValue,
-          shinyValue: defUnit.shinyValue,
-          demand: defUnit.demand,
-          stability: defUnit.stability,
-          rarity: defUnit.rarity,
-          placeCost: defUnit.placeCost,
-          img: defUnit.img,
-          upgrades: defUnit.upgrades,
-        };
-      } else {
+      if (idx === -1) {
         dbState.units.push(defUnit);
+      } else {
+        // Preserve user edited values (gems, stability, demand, upgrades), only backfill missing metadata
+        if (defUnit.crateDrops && (!dbState.units[idx].crateDrops || dbState.units[idx].crateDrops.length === 0)) {
+          dbState.units[idx].crateDrops = defUnit.crateDrops;
+        }
+        if (!dbState.units[idx].img) {
+          dbState.units[idx].img = defUnit.img;
+        }
+        if (!dbState.units[idx].obtain) {
+          dbState.units[idx].obtain = defUnit.obtain;
+        }
+        if (!dbState.units[idx].rarity) {
+          dbState.units[idx].rarity = defUnit.rarity;
+        }
       }
     });
   }
@@ -740,44 +741,39 @@ export const initPromise = (async () => {
   });
 
   app.post("/api/maintenance/toggle", (req, res) => {
-    const { password, active, adminNickname, userSessionToken } = req.body;
+    const { password, active, userSessionToken } = req.body;
     const adminPassword = process.env.ADMIN_PASSWORD || "aK9#mP2$vL8!qZ5@wN3&rY7*bT1^uJ4%xV6#Qm9$";
     if (password !== adminPassword) {
       return res.status(403).json({ error: "Invalid admin password" });
+    }
+
+    const userToken = userSessionToken || req.headers.authorization;
+    const existingTradeUser = resolveSession(userToken);
+
+    if (!existingTradeUser || !existingTradeUser.discordId) {
+      return res.status(401).json({
+        error: "Discord authorization required! You must sign in with your Discord account first to access the Admin Panel."
+      });
     }
 
     const clientIp = String(req.headers["x-forwarded-for"] || req.ip || "127.0.0.1").split(",")[0].trim();
     const userAgent = String(req.headers["user-agent"] || "Unknown Device");
     const isSuper = (password === adminPassword);
 
-    const userToken = userSessionToken || req.headers.authorization;
-    const existingTradeUser = resolveSession(userToken);
-
-    let finalNick = (adminNickname || "").trim();
-    if (!finalNick && existingTradeUser) {
-      finalNick = existingTradeUser.name ? `@${existingTradeUser.name}` : existingTradeUser.displayName;
-    }
-
-    if (!finalNick && !existingTradeUser) {
-      return res.status(400).json({
-        error: "Admin Nickname or Discord login required! Please enter your nickname or sign in with Discord/Roblox first."
-      });
-    }
+    const discordTag = `@${existingTradeUser.name || "discord_user"}`;
+    const robloxName = existingTradeUser.displayName || existingTradeUser.name || "Admin";
+    const adminDisplay = existingTradeUser.displayName || existingTradeUser.name || "Admin";
 
     maintenanceModeActive = !!active;
 
     const sessionToken = `session_admin_${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
-    
-    const discordTag = existingTradeUser?.name ? `@${existingTradeUser.name}` : (finalNick.startsWith("@") ? finalNick : `@${finalNick}`);
-    const robloxName = existingTradeUser?.displayName || existingTradeUser?.name || finalNick;
-    const adminDisplay = finalNick || (isSuper ? "Master Admin" : "Admin");
 
     const loggedUser = {
-      id: existingTradeUser?.id || 999999999,
-      name: adminDisplay,
-      displayName: existingTradeUser?.displayName ? `${adminDisplay} (${existingTradeUser.displayName})` : adminDisplay,
-      avatar: existingTradeUser?.avatar || "https://img.icons8.com/color/48/shield.png",
-      discordId: existingTradeUser?.discordId || undefined,
+      id: existingTradeUser.id || 999999999,
+      name: existingTradeUser.name || adminDisplay,
+      displayName: existingTradeUser.displayName || adminDisplay,
+      avatar: existingTradeUser.avatar || "https://img.icons8.com/color/48/shield.png",
+      discordId: existingTradeUser.discordId,
       discordTag: discordTag,
       isAdmin: true,
       isSuperAdmin: isSuper,
@@ -789,7 +785,7 @@ export const initPromise = (async () => {
       adminName: adminDisplay,
       discordTag: discordTag,
       robloxName: robloxName,
-      discordId: existingTradeUser?.discordId || undefined,
+      discordId: existingTradeUser.discordId,
       userAgent,
       isSuperAdmin: isSuper,
       loginTime: new Date().toISOString(),
@@ -797,9 +793,7 @@ export const initPromise = (async () => {
       isKicked: false,
     };
 
-    const userDisplayLabel = existingTradeUser?.name 
-      ? `@${existingTradeUser.name} (${existingTradeUser.displayName || adminDisplay})` 
-      : `${adminDisplay} (${discordTag})`;
+    const userDisplayLabel = `@${existingTradeUser.name} (${existingTradeUser.displayName || adminDisplay})`;
 
     const logEntry = {
       id: "log_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
@@ -810,15 +804,29 @@ export const initPromise = (async () => {
       isSuperAdmin: isSuper,
       sessionToken,
       unread: true,
-      text: `🚨 Admin Login Alert: User ${userDisplayLabel} logged into Admin Panel`
+      text: `🚨 Admin Login Alert: User ${userDisplayLabel} logged into Admin Panel with verified Discord`
     };
     adminLoginLogs.unshift(logEntry);
     if (adminLoginLogs.length > 100) adminLoginLogs.pop();
 
-    logAdminAction(adminDisplay, "Admin Login", `Logged into panel as ${userDisplayLabel}`);
+    logAdminAction(adminDisplay, "Admin Login", `Logged into panel with Discord as ${userDisplayLabel}`);
 
     persistState();
-    res.json({ success: true, active: maintenanceModeActive, sessionToken, isSuperAdmin: isSuper, adminName: adminDisplay, discordTag });
+    res.json({ success: true, active: maintenanceModeActive, sessionToken, isSuperAdmin: isSuper, adminName: adminDisplay, discordTag, user: loggedUser });
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    const sessionToken = req.headers.authorization || req.body?.sessionToken;
+    if (sessionToken) {
+      if (activeAdminSessions[sessionToken]) {
+        delete activeAdminSessions[sessionToken];
+      }
+      if (sessions[sessionToken]) {
+        delete sessions[sessionToken];
+      }
+      persistState();
+    }
+    res.json({ success: true });
   });
 
   // --- Admin Security & Active Sessions Endpoints ---
@@ -1575,6 +1583,18 @@ export const initPromise = (async () => {
   const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1523415843294416936";
   const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "_c751vnnD7tMd2gyLBYrRxBIx7IlbP1L";
 
+  const pendingDiscordAuth: Record<string, { status: "pending" | "ready"; sessionToken?: string; user?: any; createdAt: number }> = {};
+
+  // Periodically clean up expired states (older than 15 minutes)
+  setInterval(() => {
+    const now = Date.now();
+    for (const st in pendingDiscordAuth) {
+      if (now - pendingDiscordAuth[st].createdAt > 15 * 60 * 1000) {
+        delete pendingDiscordAuth[st];
+      }
+    }
+  }, 60000);
+
   app.get("/api/discord/oauth-config", (req, res) => {
     res.json({
       configured: !!(DISCORD_CLIENT_ID && DISCORD_CLIENT_SECRET),
@@ -1587,11 +1607,29 @@ export const initPromise = (async () => {
       return res.status(400).json({ error: "Discord OAuth Client ID is not configured in environment (.env)" });
     }
     const state = `state_${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
+    pendingDiscordAuth[state] = { status: "pending", createdAt: Date.now() };
+
     const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
     const redirectUri = `${appUrl}/api/discord/oauth-callback`;
 
     const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify+email&state=${state}`;
     res.json({ authUrl, state });
+  });
+
+  app.get("/api/discord/oauth-poll", (req, res) => {
+    const { state } = req.query;
+    if (!state || typeof state !== "string") {
+      return res.status(400).json({ error: "State parameter is required" });
+    }
+    const record = pendingDiscordAuth[state];
+    if (record && record.status === "ready" && record.sessionToken) {
+      return res.json({
+        completed: true,
+        sessionToken: record.sessionToken,
+        user: record.user,
+      });
+    }
+    res.json({ completed: false });
   });
 
   app.post("/api/auth/demo", (req, res) => {
@@ -1624,7 +1662,7 @@ export const initPromise = (async () => {
   });
 
   app.get("/api/discord/oauth-callback", async (req, res) => {
-    const { code } = req.query;
+    const { code, state } = req.query;
     if (!code) {
       return res.status(400).send("Discord OAuth Authorization Code is missing.");
     }
@@ -1726,6 +1764,16 @@ export const initPromise = (async () => {
         }
       }
 
+      // Mark auth state as ready for real-time polling
+      if (state && typeof state === "string") {
+        pendingDiscordAuth[state] = {
+          status: "ready",
+          sessionToken,
+          user: { ...loggedUser, isAdmin: checkIsAdmin(loggedUser) },
+          createdAt: Date.now(),
+        };
+      }
+
       persistState();
 
       res.send(`
@@ -1733,32 +1781,36 @@ export const initPromise = (async () => {
         <html>
           <head>
             <title>Origin TTD - Discord Auth Success</title>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <script>
               try {
                 localStorage.setItem("lttd_rb_session", "${sessionToken}");
                 if (window.opener) {
                   window.opener.postMessage({ type: "OAUTH_AUTH_SUCCESS", sessionToken: "${sessionToken}" }, "*");
                 }
-                setTimeout(function() {
-                  window.close();
-                  setTimeout(function() {
-                    const statusText = document.getElementById("status-text");
-                    if (statusText) {
-                      statusText.innerText = "Успешный вход! Вы можете закрыть эту вкладку самостоятельно.";
-                    }
-                  }, 1000);
-                }, 200);
               } catch (e) {
-                console.error("Failed to store Discord session:", e);
-                window.location.href = "/";
+                console.error("Failed to store Discord session in localStorage:", e);
               }
+              setTimeout(function() {
+                try {
+                  window.close();
+                } catch(e) {}
+              }, 400);
             </script>
           </head>
-          <body style="background: #0c0d12; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
-            <div style="text-align: center; max-width: 400px; padding: 25px; border: 1px solid rgba(88, 101, 242, 0.2); background: rgba(88, 101, 242, 0.05); border-radius: 20px;">
-              <h2 style="color: #5865f2; font-size: 24px; margin-bottom: 10px;">Вход выполнен!</h2>
-              <p id="status-text" style="color: #a1a1aa; font-size: 14px; margin-bottom: 20px;">Окно авторизации закроется автоматически.</p>
-              <button onclick="window.close()" style="background: #5865f2; color: white; border: none; padding: 10px 24px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 13px; transition: opacity 0.2s;">Закрыть окно</button>
+          <body style="background: #090a0f; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 16px; box-sizing: border-box;">
+            <div style="text-align: center; max-width: 380px; width: 100%; padding: 32px 24px; border: 1px solid rgba(88, 101, 242, 0.3); background: #121420; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(88, 101, 242, 0.15); border: 2px solid #5865f2; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
+                ✓
+              </div>
+              <h2 style="color: #ffffff; font-size: 20px; font-weight: 800; margin: 0 0 8px;">Вход выполнен!</h2>
+              <p id="status-text" style="color: #a1a1aa; font-size: 13px; margin: 0 0 24px; line-height: 1.4;">
+                Вы успешно вошли как <strong style="color: #818cf8;">@${username}</strong>.<br/>Окно закроется автоматически.
+              </p>
+              <button onclick="window.close()" style="background: #5865f2; color: white; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; transition: background 0.2s;">
+                Закрыть окно
+              </button>
             </div>
           </body>
         </html>

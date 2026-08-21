@@ -8,9 +8,18 @@ export interface Upgrade {
   income?: number;
 }
 
+export interface CrateDrop {
+  name: string;
+  chance: string;
+  chanceNum: number;
+  barColor?: string;
+  img?: string;
+  rarity?: string;
+}
+
 export interface Unit {
   name: string;
-  rarity: string; // "Basic" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Exclusive" | "Crate"
+  rarity: string; // "Basic" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Exclusive" | "Crate" | "Event"
   img: string;
   gems: number;
   demand: number;
@@ -20,6 +29,7 @@ export interface Unit {
   upgrades?: Upgrade[];
   tokenValue?: string | number;
   shinyValue?: string | number;
+  crateDrops?: CrateDrop[];
 }
 
 export interface Staff {

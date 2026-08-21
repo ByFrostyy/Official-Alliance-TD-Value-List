@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { AdminPanel } from "./components/AdminPanel";
 import { Gem, History, Map, Calendar, Swords, TrendingUp, Sparkles, Compass, ShieldAlert, ArrowRightLeft, Wrench, Lock, Unlock, AlertTriangle, Volume2, VolumeX, Music, Upload, Trash2, ExternalLink, Info, FileText, Clock } from "lucide-react";
@@ -42,44 +42,45 @@ export default function App() {
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [loggedTradeUser, setLoggedTradeUser] = useState<any | null>(null);
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const token = localStorage.getItem("lttd_rb_session");
-      if (!token) {
-        setIsAdminUser(false);
-        setLoggedTradeUser(null);
-        return;
-      }
-      try {
-        const res = await fetch("/api/roblox/session-check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionToken: token })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.isBanned) {
-            setIsBanned(true);
-            setBanReason(data.banReason || "Violation of rules");
-            setIsAdminUser(false);
-            setLoggedTradeUser(null);
-          } else if (data.valid && data.user) {
-            setLoggedTradeUser(data.user);
-            const isAdm = !!data.user.isAdmin;
-            setIsAdminUser(isAdm);
-            setIsBanned(false);
-          } else {
-            setIsAdminUser(false);
-            setIsBanned(false);
-            setLoggedTradeUser(null);
-          }
+  const checkUserSession = useCallback(async () => {
+    const token = localStorage.getItem("lttd_rb_session");
+    if (!token) {
+      setIsAdminUser(false);
+      setLoggedTradeUser(null);
+      return;
+    }
+    try {
+      const res = await fetch("/api/roblox/session-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionToken: token })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isBanned) {
+          setIsBanned(true);
+          setBanReason(data.banReason || "Violation of rules");
+          setIsAdminUser(false);
+          setLoggedTradeUser(null);
+        } else if (data.valid && data.user) {
+          setLoggedTradeUser(data.user);
+          const isAdm = !!data.user.isAdmin;
+          setIsAdminUser(isAdm);
+          setIsBanned(false);
+        } else {
+          setIsAdminUser(false);
+          setIsBanned(false);
+          setLoggedTradeUser(null);
         }
-      } catch {}
-    };
-    checkAdmin();
-    const interval = setInterval(checkAdmin, 5000);
-    return () => clearInterval(interval);
+      }
+    } catch {}
   }, []);
+
+  useEffect(() => {
+    checkUserSession();
+    const interval = setInterval(checkUserSession, 4000);
+    return () => clearInterval(interval);
+  }, [checkUserSession]);
 
   const [isUpdatingMode, setIsUpdatingMode] = useState(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
@@ -342,15 +343,101 @@ export default function App() {
     }
   }, []);
 
+  const handleDiscordLoginForAdmin = async () => {
+    try {
+      setAdminError("");
+      const res = await fetch("/api/discord/oauth-start");
+      const data = await res.json();
+      if (data.authUrl && data.state) {
+        const win = window.open(data.authUrl, "_blank");
+
+        // Fast state polling (works seamlessly across iframe / popup boundaries)
+        const pollInterval = setInterval(async () => {
+          try {
+            const pollRes = await fetch(`/api/discord/oauth-poll?state=${data.state}`);
+            if (pollRes.ok) {
+              const pollData = await pollRes.json();
+              if (pollData.completed && pollData.sessionToken) {
+                clearInterval(pollInterval);
+                localStorage.setItem("lttd_rb_session", pollData.sessionToken);
+                setLoggedTradeUser(pollData.user);
+                setIsAdminUser(!!pollData.user?.isAdmin);
+                if (win && !win.closed) {
+                  try { win.close(); } catch(e){}
+                }
+                checkUserSession();
+              }
+            }
+          } catch {}
+        }, 700);
+
+        // postMessage listener fallback
+        const handler = (e: MessageEvent) => {
+          if (e.data.type === "OAUTH_AUTH_SUCCESS") {
+            const token = e.data.sessionToken;
+            localStorage.setItem("lttd_rb_session", token);
+            window.removeEventListener("message", handler);
+            clearInterval(pollInterval);
+            if (win && !win.closed) {
+              try { win.close(); } catch(e){}
+            }
+            checkUserSession();
+          }
+        };
+        window.addEventListener("message", handler);
+
+        // Stop polling after 3 minutes
+        setTimeout(() => {
+          clearInterval(pollInterval);
+          window.removeEventListener("message", handler);
+        }, 180000);
+      }
+    } catch (err) {
+      console.error("Discord OAuth Start error:", err);
+      setAdminError("Failed to initiate Discord authorization");
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      const token = localStorage.getItem("lttd_rb_session");
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": token || ""
+        },
+        body: JSON.stringify({ sessionToken: token })
+      });
+    } catch (e) {
+      console.error("Admin logout error:", e);
+    }
+    localStorage.removeItem("origin_admin_bypass");
+    localStorage.removeItem("origin_admin_password");
+    localStorage.removeItem("origin_admin_nickname");
+    localStorage.removeItem("lttd_rb_session");
+    setIsBypassed(false);
+    setIsAdminUser(false);
+    setIsAdminPanelOpen(false);
+    setLoggedTradeUser(null);
+    setShowAdminForm(false);
+    checkUserSession();
+  };
+
   const handleAdminBypassSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdminError("");
+
+    const token = localStorage.getItem("lttd_rb_session");
+    if (!loggedTradeUser || !loggedTradeUser.discordId) {
+      setAdminError("Please connect your Discord account first!");
+      return;
+    }
+
     if (!adminPasswordInput) {
       setAdminError("Please enter the admin password!");
       return;
     }
-
-    const token = localStorage.getItem("lttd_rb_session");
 
     try {
       const res = await fetch("/api/maintenance/toggle", {
@@ -361,7 +448,6 @@ export default function App() {
         },
         body: JSON.stringify({ 
           password: adminPasswordInput, 
-          adminNickname: adminNicknameInput,
           userSessionToken: token || undefined,
           active: maintenanceActive 
         })
@@ -371,9 +457,6 @@ export default function App() {
         const data = await res.json();
         localStorage.setItem("origin_admin_bypass", "true");
         localStorage.setItem("origin_admin_password", adminPasswordInput);
-        if (adminNicknameInput) {
-          localStorage.setItem("origin_admin_nickname", adminNicknameInput);
-        }
         if (data.sessionToken) {
           localStorage.setItem("lttd_rb_session", data.sessionToken);
           setIsAdminUser(true);
@@ -382,9 +465,10 @@ export default function App() {
         setIsAdminPanelOpen(true);
         setShowAdminForm(false);
         setAdminError("");
+        checkUserSession();
       } else {
         const data = await res.json();
-        setAdminError(data.error || "Invalid admin password!");
+        setAdminError(data.error || "Invalid admin credentials!");
       }
     } catch (err) {
       setAdminError("Server connection error");
@@ -485,25 +569,38 @@ export default function App() {
                   <Unlock className="w-3.5 h-3.5 text-amber-400 animate-pulse" /> Admin Authentication
                 </div>
 
-                {loggedTradeUser ? (
-                  <div className="text-[11px] text-indigo-300 font-mono bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-xl flex items-center justify-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    Account Bound: <strong className="text-white">@{loggedTradeUser.name}</strong>
+                {loggedTradeUser && loggedTradeUser.discordId ? (
+                  <div className="text-[11px] text-indigo-300 font-mono bg-indigo-500/10 border border-indigo-500/20 p-2.5 rounded-xl flex items-center justify-center gap-2.5">
+                    <img 
+                      src={loggedTradeUser.avatar || "https://img.icons8.com/color/48/discord-logo.png"} 
+                      alt="" 
+                      className="w-5 h-5 rounded-full border border-white/10" 
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="text-left">
+                      <div className="text-white font-bold leading-tight">@{loggedTradeUser.name}</div>
+                      <div className="text-[9px] text-emerald-400 font-medium">Discord Authorized</div>
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-slate-400 font-mono">
-                    💡 <span className="text-indigo-400">Tip:</span> Sign in with Discord in Trade Community or enter your nickname below.
+                  <div className="space-y-2">
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      🔒 <span className="text-indigo-300">Discord Login Required</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleDiscordLoginForAdmin}
+                      className="w-full py-2 px-3 bg-[#5865F2] hover:bg-[#4752C4] active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition duration-150 cursor-pointer"
+                    >
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                      </svg>
+                      Sign In with Discord
+                    </button>
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder={loggedTradeUser ? `@${loggedTradeUser.name} (Admin Nickname)` : "Admin Nickname / Discord Tag (Required)"}
-                    value={adminNicknameInput}
-                    onChange={(e) => setAdminNicknameInput(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 font-mono text-center"
-                  />
                   <div className="flex gap-2">
                     <input
                       type="password"
@@ -515,7 +612,8 @@ export default function App() {
                     />
                     <button
                       type="submit"
-                      className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black px-4 rounded-xl text-xs uppercase tracking-wider transition duration-150 cursor-pointer"
+                      disabled={!loggedTradeUser || !loggedTradeUser.discordId}
+                      className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black px-4 rounded-xl text-xs uppercase tracking-wider transition duration-150 cursor-pointer disabled:opacity-50"
                     >
                       Log In
                     </button>
@@ -564,13 +662,8 @@ export default function App() {
               {isUpdatingMode ? "Updating..." : maintenanceActive ? "ACTIVE" : "DISABLED"}
             </button>
             <button
-              onClick={() => {
-                localStorage.removeItem("origin_admin_bypass");
-                localStorage.removeItem("origin_admin_password");
-                setIsBypassed(false);
-                window.location.reload();
-              }}
-              className="text-[9px] text-slate-500 hover:text-slate-300 underline uppercase tracking-wider cursor-pointer"
+              onClick={handleAdminLogout}
+              className="text-[9px] text-rose-400 hover:text-rose-300 underline uppercase tracking-wider cursor-pointer font-bold"
             >
               Exit Admin
             </button>
@@ -772,7 +865,12 @@ export default function App() {
         </nav>
 
         {/* Active Content Body */}
-        <AdminPanel isOpen={isAdminPanelOpen} onClose={() => setIsAdminPanelOpen(false)} onRefreshData={fetchDynamicData} />
+        <AdminPanel 
+          isOpen={isAdminPanelOpen} 
+          onClose={() => setIsAdminPanelOpen(false)} 
+          onRefreshData={fetchDynamicData} 
+          onLogout={handleAdminLogout}
+        />
 
         <main className="relative z-10 mb-8 min-h-[50vh]">
           <AnimatePresence mode="wait">
@@ -860,25 +958,36 @@ export default function App() {
                       <Unlock className="w-3 h-3 text-amber-400 animate-pulse" /> Admin Panel Auth
                     </div>
 
-                    {loggedTradeUser ? (
-                      <div className="text-[10px] text-indigo-300 font-mono bg-indigo-500/10 border border-indigo-500/20 p-1.5 rounded-lg flex items-center justify-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Connected: <strong className="text-white">@{loggedTradeUser.name}</strong>
+                    {loggedTradeUser && loggedTradeUser.discordId ? (
+                      <div className="text-[10px] text-indigo-300 font-mono bg-indigo-500/10 border border-indigo-500/20 p-2 rounded-xl flex items-center justify-center gap-2">
+                        <img 
+                          src={loggedTradeUser.avatar || "https://img.icons8.com/color/48/discord-logo.png"} 
+                          alt="" 
+                          className="w-4 h-4 rounded-full border border-white/10" 
+                          referrerPolicy="no-referrer"
+                        />
+                        <span>@{loggedTradeUser.name}</span>
+                        <span className="text-[8px] text-emerald-400 font-bold px-1 py-0.2 bg-emerald-500/10 rounded">Verified</span>
                       </div>
                     ) : (
-                      <div className="text-[9px] text-slate-400 font-mono text-center">
-                        Enter Admin Nickname or sign in with Discord
+                      <div className="space-y-2">
+                        <div className="text-[9px] text-slate-400 font-mono text-center">
+                          🔒 Discord Auth Required
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleDiscordLoginForAdmin}
+                          className="w-full py-1.5 px-2.5 bg-[#5865F2] hover:bg-[#4752C4] active:scale-95 text-white font-bold rounded-xl text-[10px] flex items-center justify-center gap-1.5 shadow transition duration-150 cursor-pointer"
+                        >
+                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                          </svg>
+                          Sign In with Discord
+                        </button>
                       </div>
                     )}
 
                     <div className="space-y-2">
-                      <input
-                        type="text"
-                        placeholder={loggedTradeUser ? `@${loggedTradeUser.name} (Nickname)` : "Admin Nickname / Discord Username"}
-                        value={adminNicknameInput}
-                        onChange={(e) => setAdminNicknameInput(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 font-mono text-center"
-                      />
                       <div className="flex gap-2">
                         <input
                           type="password"
@@ -890,7 +999,8 @@ export default function App() {
                         />
                         <button
                           type="submit"
-                          className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-extrabold px-3 rounded-xl text-[10px] uppercase tracking-wider transition duration-150 cursor-pointer"
+                          disabled={!loggedTradeUser || !loggedTradeUser.discordId}
+                          className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-extrabold px-3 rounded-xl text-[10px] uppercase tracking-wider transition duration-150 cursor-pointer disabled:opacity-50"
                         >
                           Log In
                         </button>
@@ -909,12 +1019,20 @@ export default function App() {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => setIsAdminPanelOpen(true)}
-                className="text-zinc-400 hover:text-zinc-300 font-bold uppercase tracking-widest text-[10px] transition duration-150 flex items-center gap-1.5 cursor-pointer hover:underline"
-              >
-                <Lock className="w-3 h-3" /> Admin Panel
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsAdminPanelOpen(true)}
+                  className="text-zinc-300 hover:text-white font-bold uppercase tracking-widest text-[10px] transition duration-150 flex items-center gap-1.5 cursor-pointer bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10"
+                >
+                  <Lock className="w-3 h-3 text-amber-400" /> Admin Panel
+                </button>
+                <button
+                  onClick={handleAdminLogout}
+                  className="text-rose-400 hover:text-rose-300 font-bold uppercase tracking-widest text-[10px] transition duration-150 flex items-center gap-1 cursor-pointer hover:underline"
+                >
+                  Log Out
+                </button>
+              </div>
             )}
           </div>
         </footer>

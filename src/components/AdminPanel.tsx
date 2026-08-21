@@ -7,6 +7,7 @@ interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onRefreshData?: () => void;
+  onLogout?: () => void;
 }
 
 type AdminTab = "admins_audio" | "audit_logs" | "units" | "signatures" | "forbidden_words" | "reports" | "roadmap" | "countdown" | "updates_log";
@@ -22,11 +23,37 @@ const colorPresets = [
   { name: "Cosmic Dark", value: "linear-gradient(90deg, #818cf8 0%, #c084fc 100%)" },
 ];
 
-export function AdminPanel({ isOpen, onClose, onRefreshData }: AdminPanelProps) {
+export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>("admins_audio");
   
   const getAdminToken = () => {
     return localStorage.getItem("lttd_rb_session") || localStorage.getItem("origin_admin_password") || "";
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      const token = getAdminToken();
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": token 
+        },
+        body: JSON.stringify({ sessionToken: token })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    localStorage.removeItem("origin_admin_bypass");
+    localStorage.removeItem("origin_admin_password");
+    localStorage.removeItem("origin_admin_nickname");
+    localStorage.removeItem("lttd_rb_session");
+    if (onLogout) {
+      onLogout();
+    } else {
+      onClose();
+      window.location.reload();
+    }
   };
 
   const maskEmail = (email: string) => {
@@ -1345,12 +1372,22 @@ export function AdminPanel({ isOpen, onClose, onRefreshData }: AdminPanelProps) 
         exit={{ scale: 0.95, opacity: 0 }}
         className="bg-[#0a0c16]/95 border border-zinc-500/25 p-6 rounded-3xl w-full max-w-4xl h-[90vh] flex flex-col gap-5 shadow-neon-zinc relative"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/5 transition select-none cursor-pointer z-50"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <div className="absolute top-5 right-5 flex items-center gap-2 z-50">
+          <button
+            onClick={handleAdminLogout}
+            title="Log Out of Admin"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 hover:text-rose-300 text-xs font-bold font-mono transition cursor-pointer"
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>Log Out</span>
+          </button>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/5 transition select-none cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-white/5 pb-4 shrink-0">

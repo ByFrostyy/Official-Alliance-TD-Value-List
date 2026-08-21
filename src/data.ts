@@ -272,6 +272,74 @@ export const Yl: Unit[] = [
       { lvl: 1, cost: "Place ($1800)", dmg: 22, cd: 0.3, range: 16 },
       { lvl: 2, cost: "Max Lvl", dmg: 31, cd: 0.1, range: 19 }
     ]
+  },
+  {
+    name: "Party Crate",
+    rarity: "Crate",
+    img: "https://i.postimg.cc/13RhJSMn/cd4eca2771f66a3b.png",
+    gems: 50,
+    tokenValue: "50",
+    shinyValue: "100",
+    demand: 8,
+    stability: "Stable",
+    placeCost: 0,
+    obtain: "Party Event Quests & Rewards",
+    crateDrops: [
+      { name: "Party Camera Man", chance: "50%", chanceNum: 50, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Event" },
+      { name: "Jester Speaker Man", chance: "40%", chanceNum: 40, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Event" },
+      { name: "Party Titan TV Man", chance: "10%", chanceNum: 10, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Event" }
+    ]
+  },
+  {
+    name: "Scientist Crate",
+    rarity: "Crate",
+    img: "https://i.postimg.cc/MGjsYrkV/dsadsad.png",
+    gems: 100,
+    tokenValue: "100",
+    shinyValue: "200",
+    demand: 7,
+    stability: "Stable",
+    placeCost: 0,
+    obtain: "Shop / Summon",
+    crateDrops: [
+      { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+      { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+      { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+    ]
+  },
+  {
+    name: "Free Scientist Crate",
+    rarity: "Crate",
+    img: "https://i.postimg.cc/MGjsYrkV/dsadsad.png",
+    gems: 0,
+    tokenValue: "0/C",
+    shinyValue: "0",
+    demand: 5,
+    stability: "Stable",
+    placeCost: 0,
+    obtain: "Free Daily Reward",
+    crateDrops: [
+      { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+      { name: "Large Scientist Camera Man", chance: "39.9%", chanceNum: 39.9, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+      { name: "Engineer Camera Man", chance: "0.1%", chanceNum: 0.1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+    ]
+  },
+  {
+    name: "Summer Crate",
+    rarity: "Crate",
+    img: "https://i.postimg.cc/KYZD7VSk/16-20260701171144.png",
+    gems: 300,
+    tokenValue: "300",
+    shinyValue: "600",
+    demand: 9,
+    stability: "Hyped",
+    placeCost: 0,
+    obtain: "Summer Event Pass",
+    crateDrops: [
+      { name: "Titan Speaker Man", chance: "70%", chanceNum: 70, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Legendary" },
+      { name: "Titan TV Man", chance: "29%", chanceNum: 29, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Legendary" },
+      { name: "Titan Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+    ]
   }
 ];
 

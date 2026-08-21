@@ -245,55 +245,74 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
 
   // Crate drops calculations
   const crateLoot = useMemo(() => {
-    if (!detailUnit || detailUnit.rarity !== "Crate") return null;
-    let drops: { name: string; chance: string; chanceNum: number; barColor: string }[] = [];
+    if (!detailUnit) return null;
+    const isCrate = detailUnit.rarity.toLowerCase() === "crate" || detailUnit.name.toLowerCase().includes("crate") || (detailUnit.crateDrops && detailUnit.crateDrops.length > 0);
+    if (!isCrate) return null;
 
-    if (detailUnit.name === "Summer Crate") {
+    if (detailUnit.crateDrops && detailUnit.crateDrops.length > 0) {
+      return detailUnit.crateDrops.map(drop => {
+        const u = units.find(item => item.name.toLowerCase() === drop.name.toLowerCase());
+        return {
+          name: drop.name,
+          rarity: drop.rarity || u?.rarity || "Exclusive",
+          img: drop.img || u?.img || "https://i.postimg.cc/mD8zQyY7/toilet-tower-defense-default.webp",
+          gems: u ? u.gems : -1,
+          chance: drop.chance,
+          chanceNum: drop.chanceNum,
+          barColor: drop.barColor || (drop.chanceNum < 1 ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]" : drop.chanceNum < 20 ? "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]")
+        };
+      });
+    }
+
+    const lowerName = detailUnit.name.toLowerCase();
+    let drops: { name: string; chance: string; chanceNum: number; barColor: string; rarity?: string; img?: string }[] = [];
+
+    if (lowerName.includes("party")) {
       drops = [
-        {
-          name: "Summer Titan Speakerman",
-          chance: "100%",
-          chanceNum: 100,
-          barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
-        }
+        { name: "Party Camera Man", chance: "50%", chanceNum: 50, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Event" },
+        { name: "Jester Speaker Man", chance: "40%", chanceNum: 40, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Event" },
+        { name: "Party Titan TV Man", chance: "10%", chanceNum: 10, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Event" },
+      ];
+    } else if (lowerName.includes("summer")) {
+      drops = [
+        { name: "Titan Speaker Man", chance: "70%", chanceNum: 70, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Legendary" },
+        { name: "Titan TV Man", chance: "29%", chanceNum: 29, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Legendary" },
+        { name: "Titan Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" },
+      ];
+    } else if (lowerName.includes("free scientist")) {
+      drops = [
+        { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+        { name: "Large Scientist Camera Man", chance: "39.9%", chanceNum: 39.9, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+        { name: "Engineer Camera Man", chance: "0.1%", chanceNum: 0.1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" },
+      ];
+    } else if (lowerName.includes("scientist")) {
+      drops = [
+        { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+        { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+        { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" },
       ];
     } else {
-      const isFree = detailUnit.name === "Free Scientist Crate";
       drops = [
-        {
-          name: "Scientist Cameraman",
-          chance: "60%",
-          chanceNum: 60,
-          barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
-        },
-        {
-          name: "Large Scientist",
-          chance: isFree ? "39.9%" : "39%",
-          chanceNum: isFree ? 39.9 : 39,
-          barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]"
-        },
-        {
-          name: "Engineer Camera man",
-          chance: isFree ? "0.1%" : "1%",
-          chanceNum: isFree ? 0.1 : 1,
-          barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
-        }
+        { name: "Speaker Man", chance: "50%", chanceNum: 50, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Basic" },
+        { name: "Camera Man", chance: "35%", chanceNum: 35, barColor: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]", rarity: "Uncommon" },
+        { name: "TV Man", chance: "10%", chanceNum: 10, barColor: "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.3)]", rarity: "Rare" },
+        { name: "Titan TV Man", chance: "5%", chanceNum: 5, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Legendary" },
       ];
     }
 
     return drops.map(drop => {
-      const u = units.find(item => item.name === drop.name);
+      const u = units.find(item => item.name.toLowerCase() === drop.name.toLowerCase());
       return {
         name: drop.name,
-        rarity: u?.rarity || "Exclusive",
-        img: u?.img || "",
-        gems: u ? u.gems : 0,
+        rarity: drop.rarity || u?.rarity || "Exclusive",
+        img: drop.img || u?.img || "https://i.postimg.cc/mD8zQyY7/toilet-tower-defense-default.webp",
+        gems: u ? u.gems : -1,
         chance: drop.chance,
         chanceNum: drop.chanceNum,
         barColor: drop.barColor
       };
     });
-  }, [detailUnit]);
+  }, [detailUnit, units]);
 
   const renderTrendStatus = (stability: string) => {
     const s = stability.toLowerCase();
@@ -588,7 +607,7 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
           <Star className={`w-3.5 h-3.5 ${selectedRarity === "favorites" ? "fill-amber-400 text-amber-400" : "text-amber-400"}`} />
           <span>Favorites ({favorites.length})</span>
         </button>
-        {["All", "Basics", "Commons", "Uncommons", "Rares", "Epics", "Legendaries", "Mythics", "Exclusives"].map(rarity => {
+        {["All", "Basics", "Commons", "Uncommons", "Rares", "Epics", "Legendaries", "Mythics", "Exclusives", "Crates", "Events"].map(rarity => {
           let key = rarity;
           if (rarity === "Basics") key = "Basic";
           else if (rarity === "Commons") key = "Common";
@@ -598,9 +617,11 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
           else if (rarity === "Legendaries") key = "Legendary";
           else if (rarity === "Mythics") key = "Mythic";
           else if (rarity === "Exclusives") key = "Exclusive";
+          else if (rarity === "Crates") key = "Crate";
+          else if (rarity === "Events") key = "Event";
 
           const matchedRarity = rarityClasses[key] || rarityClasses.All;
-          const isSelected = selectedRarity === rarity.toLowerCase() || (rarity === "All" && selectedRarity === "all");
+          const isSelected = selectedRarity === rarity.toLowerCase() || (rarity === "All" && selectedRarity === "all") || (rarity === "Crates" && selectedRarity === "crate") || (rarity === "Events" && selectedRarity === "event");
           const rGlow =
             rarity === "All" ? "bg-blue-400" :
             rarity === "Basics" ? "bg-zinc-400" :
@@ -611,12 +632,14 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
             rarity === "Legendaries" ? "bg-yellow-400" :
             rarity === "Mythics" ? "bg-rose-400" :
             rarity === "Exclusives" ? "bg-indigo-400" :
+            rarity === "Crates" ? "bg-amber-400" :
+            rarity === "Events" ? "bg-pink-400" :
             "bg-zinc-400";
 
           return (
             <button
               key={`rarity-${rarity}`}
-              onClick={() => setSelectedRarity(rarity.toLowerCase() === "all" ? "all" : rarity.toLowerCase())}
+              onClick={() => setSelectedRarity(rarity.toLowerCase() === "all" ? "all" : rarity.toLowerCase() === "crates" ? "crate" : rarity.toLowerCase() === "events" ? "event" : rarity.toLowerCase())}
               className={`text-[10px] font-black uppercase py-2.5 px-4 rounded-xl shrink-0 border flex items-center gap-2 transition-all duration-300 select-none cursor-pointer ${
                 isSelected
                   ? "bg-white/[0.06] text-white border-zinc-500 shadow-sm scale-[1.02]"
@@ -792,7 +815,7 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                 <div className="flex justify-between items-center py-0.5 border-b border-white/[0.02]">
                   <span className="text-slate-500 font-medium">Value</span>
                   <span className="font-sans font-black text-white">
-                    {unit.tokenValue !== undefined ? unit.tokenValue : (unit.gems === 0 ? "0/C" : unit.gems.toLocaleString())}
+                    {unit.gems === -1 ? "N/A" : (unit.gems === 0 ? "0/C" : unit.gems.toLocaleString())}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-0.5 border-b border-white/[0.02]">
@@ -918,7 +941,7 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
 
               {/* Lower Details Table (Upgrades or Crate drop) */}
               <div className="w-full">
-                {detailUnit.rarity === "Crate" ? (
+                {crateLoot && crateLoot.length > 0 ? (
                   <>
                     <span className="text-[9px] uppercase font-black tracking-widest text-[#a855f7] block mb-3">Crate Loot drops and chances</span>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
