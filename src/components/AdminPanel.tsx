@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { X, ShieldAlert, Plus, Trash2, Music, Check, Settings, Sparkles, Gem, Upload, Search, Sliders, List, Volume2, VolumeX, Flag, Ban, Calendar, Eye, Trash, ShieldCheck, ChevronDown, Info, Map, Clock, Rocket, Star, Wrench, CheckCircle2, Flame, Image as ImageIcon, ArrowUp, ArrowDown, Edit3, Save, History, RefreshCw } from "lucide-react";
+import { X, ShieldAlert, Plus, Trash2, Music, Check, Settings, Sparkles, Gem, Upload, Search, Sliders, List, Volume2, VolumeX, Flag, Ban, Calendar, Eye, Trash, ShieldCheck, ChevronDown, Info, Map, Clock, Rocket, Star, Wrench, CheckCircle2, Flame, Image as ImageIcon, ArrowUp, ArrowDown, Edit3, Save, History, RefreshCw, Package } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Unit, SignValue, Upgrade, RoadmapItem, CountdownConfig, UpdateLog } from "../types";
+import { Unit, SignValue, Upgrade, RoadmapItem, CountdownConfig, UpdateLog, CrateDrop } from "../types";
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -148,9 +148,20 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
     { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 }
   ]);
 
+  // Crate Drops Creator State
+  const [newUnitCrateDrops, setNewUnitCrateDrops] = useState<CrateDrop[]>([
+    { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+    { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+    { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+  ]);
+
   // Editing Unit Upgrades Modal State
   const [editingUnitUpgrades, setEditingUnitUpgrades] = useState<Unit | null>(null);
   const [tempUpgradesList, setTempUpgradesList] = useState<Upgrade[]>([]);
+
+  // Editing Crate Drops Modal State
+  const [editingCrateDropsUnit, setEditingCrateDropsUnit] = useState<Unit | null>(null);
+  const [tempCrateDropsList, setTempCrateDropsList] = useState<CrateDrop[]>([]);
 
   // New Signature Form State
   const [newSignName, setNewSignName] = useState("");
@@ -1243,7 +1254,8 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
       img: newUnitImg.trim() || defaultImg,
       placeCost: Number(newUnitPlaceCost) || 0,
       obtain: newUnitObtain.trim() || "Summon",
-      upgrades: newUnitUpgrades
+      upgrades: newUnitUpgrades,
+      ...(newUnitRarity === "Crate" || newUnitCrateDrops.length > 0 ? { crateDrops: newUnitCrateDrops } : {})
     };
 
     const updated = [newUnit, ...units];
@@ -1254,8 +1266,13 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
         setNewUnitPlaceCost(0);
         setNewUnitObtain("Summon");
         setNewUnitUpgrades([{ lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 }]);
+        setNewUnitCrateDrops([
+          { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+          { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+          { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+        ]);
         setUnits(updated);
-        showToast(`Successfully added new unit: ${newUnit.name}`, "success");
+        showToast(`Successfully added new unit / crate: ${newUnit.name}`, "success");
       }
     });
   };
@@ -2051,177 +2068,355 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                     </div>
                   </div>
 
-                  {/* Upgrades Creator Section */}
+                  {/* Config Type Tabs: Unit Levels & Stats VS Crate Drops Table */}
                   <div className="border-t border-white/5 pt-4 mt-2">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-1.5 text-white">
-                        <Sliders className="w-4 h-4 text-white animate-pulse" />
-                        <h5 className="text-xs font-black uppercase tracking-wider font-sans">Unit Levels & Stats</h5>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        {newUnitRarity === "Crate" ? (
+                          <div className="flex items-center gap-1.5 text-purple-400">
+                            <Package className="w-4 h-4 text-purple-400 animate-pulse" />
+                            <h5 className="text-xs font-black uppercase tracking-wider font-sans">Crate Loot & Drop Table</h5>
+                            <span className="text-[9px] bg-purple-500/20 text-purple-300 font-mono px-1.5 py-0.5 rounded border border-purple-500/30">
+                              {newUnitCrateDrops.length} drops
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-white">
+                            <Sliders className="w-4 h-4 text-white animate-pulse" />
+                            <h5 className="text-xs font-black uppercase tracking-wider font-sans">Unit Levels & Stats</h5>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const basePlace = Number(newUnitPlaceCost) || 1000;
-                            setNewUnitUpgrades([
-                              { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
-                              { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
-                              { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
-                              { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
-                              { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 }
-                            ]);
-                            showToast("Generated 5 balanced levels based on Place Cost!", "info");
-                          }}
-                          className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
-                        >
-                          ⚡ Auto 5 Lvls
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const basePlace = Number(newUnitPlaceCost) || 1000;
-                            setNewUnitUpgrades([
-                              { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
-                              { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
-                              { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
-                              { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
-                              { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 },
-                              { lvl: 6, cost: `$${Math.round(basePlace * 12)}`, dmg: 8000, cd: 0.3, range: 50 }
-                            ]);
-                            showToast("Generated 6 balanced levels based on Place Cost!", "info");
-                          }}
-                          className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
-                        >
-                          ⚡ Auto 6 Lvls
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const nextLvl = newUnitUpgrades.length + 1;
-                            const prevLvl = newUnitUpgrades[newUnitUpgrades.length - 1];
-                            const prevCost = prevLvl && prevLvl.cost !== "Place" ? parseInt(prevLvl.cost.replace(/[^0-9]/g, ""), 10) : 1000;
-                            const nextCost = prevLvl ? (isNaN(prevCost) ? 1000 : Math.round(prevCost * 1.8)) : 1000;
-                            setNewUnitUpgrades([
-                              ...newUnitUpgrades,
-                              {
-                                lvl: nextLvl,
-                                cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
-                                dmg: prevLvl ? Math.round((prevLvl.dmg || 500) * 1.6) : 500,
-                                cd: prevLvl ? Number(((prevLvl.cd || 1) * 0.9).toFixed(2)) : 1,
-                                range: prevLvl ? Math.round((prevLvl.range || 20) * 1.2) : 20
-                              }
-                            ]);
-                          }}
-                          className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-zinc-800 hover:bg-zinc-700 text-slate-300 border border-white/5 cursor-pointer transition flex items-center gap-1"
-                        >
-                          <Plus className="w-3 h-3" /> Add Level
-                        </button>
-                      </div>
+
+                      {newUnitRarity === "Crate" ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewUnitCrateDrops([
+                                { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+                                { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+                                { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+                              ]);
+                              showToast("Loaded 3-Tier standard crate drop table (60% / 39% / 1%)!", "info");
+                            }}
+                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 cursor-pointer transition"
+                          >
+                            ⚡ Preset (60/39/1)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const total = newUnitCrateDrops.reduce((acc, curr) => acc + (Number(curr.chanceNum) || 0), 0);
+                              if (total <= 0) return;
+                              const normalized = newUnitCrateDrops.map(d => {
+                                const ratio = ((Number(d.chanceNum) || 0) / total) * 100;
+                                const rounded = Math.round(ratio * 10) / 10;
+                                return { ...d, chanceNum: rounded, chance: `${rounded}%` };
+                              });
+                              setNewUnitCrateDrops(normalized);
+                              showToast("Normalized drop chances to 100% total!", "success");
+                            }}
+                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
+                          >
+                            ⚡ 100% Total
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewUnitCrateDrops([
+                                ...newUnitCrateDrops,
+                                { name: "New Drop Unit", chance: "10%", chanceNum: 10, rarity: "Exclusive", barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" }
+                              ]);
+                            }}
+                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-zinc-800 hover:bg-zinc-700 text-slate-300 border border-white/5 cursor-pointer transition flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" /> Add Drop
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const basePlace = Number(newUnitPlaceCost) || 1000;
+                              setNewUnitUpgrades([
+                                { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
+                                { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
+                                { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
+                                { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
+                                { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 }
+                              ]);
+                              showToast("Generated 5 balanced levels based on Place Cost!", "info");
+                            }}
+                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
+                          >
+                            ⚡ Auto 5 Lvls
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const basePlace = Number(newUnitPlaceCost) || 1000;
+                              setNewUnitUpgrades([
+                                { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
+                                { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
+                                { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
+                                { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
+                                { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 },
+                                { lvl: 6, cost: `$${Math.round(basePlace * 12)}`, dmg: 8000, cd: 0.3, range: 50 }
+                              ]);
+                              showToast("Generated 6 balanced levels based on Place Cost!", "info");
+                            }}
+                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
+                          >
+                            ⚡ Auto 6 Lvls
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextLvl = newUnitUpgrades.length + 1;
+                              const prevLvl = newUnitUpgrades[newUnitUpgrades.length - 1];
+                              const prevCost = prevLvl && prevLvl.cost !== "Place" ? parseInt(prevLvl.cost.replace(/[^0-9]/g, ""), 10) : 1000;
+                              const nextCost = prevLvl ? (isNaN(prevCost) ? 1000 : Math.round(prevCost * 1.8)) : 1000;
+                              setNewUnitUpgrades([
+                                ...newUnitUpgrades,
+                                {
+                                  lvl: nextLvl,
+                                  cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
+                                  dmg: prevLvl ? Math.round((prevLvl.dmg || 500) * 1.6) : 500,
+                                  cd: prevLvl ? Number(((prevLvl.cd || 1) * 0.9).toFixed(2)) : 1,
+                                  range: prevLvl ? Math.round((prevLvl.range || 20) * 1.2) : 20
+                                }
+                              ]);
+                            }}
+                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-zinc-800 hover:bg-zinc-700 text-slate-300 border border-white/5 cursor-pointer transition flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" /> Add Level
+                          </button>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden shadow-inner mb-4">
-                      <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
-                        <span className="col-span-1 text-center">LVL</span>
-                        <span className="col-span-3 text-center">UPGRADE COST</span>
-                        <span className="col-span-3 text-center font-black">DAMAGE (DMG)</span>
-                        <span className="col-span-2 text-center">COOLDOWN</span>
-                        <span className="col-span-2 text-center">RADIUS (RANGE)</span>
-                        <span className="col-span-1 text-right"></span>
+                    {newUnitRarity === "Crate" ? (
+                      /* Crate Drops Builder */
+                      <div className="bg-black/40 border border-purple-500/20 rounded-xl overflow-hidden shadow-inner mb-4">
+                        <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-purple-950/20 border-b border-purple-500/10 text-[9px] font-black text-purple-300 uppercase tracking-widest select-none font-mono">
+                          <span className="col-span-5 text-left">DROP ITEM / UNIT</span>
+                          <span className="col-span-3 text-center font-black">CHANCE (%)</span>
+                          <span className="col-span-3 text-center">RARITY</span>
+                          <span className="col-span-1 text-right"></span>
+                        </div>
+
+                        <div className="divide-y divide-white/5 max-h-56 overflow-y-auto scrollbar-thin">
+                          {newUnitCrateDrops.map((drop, index) => (
+                            <div key={index} className="grid grid-cols-12 gap-1.5 px-3 py-2 items-center hover:bg-white/[0.01]">
+                              <div className="col-span-5 flex items-center gap-1.5">
+                                <select
+                                  onChange={e => {
+                                    const selected = units.find(item => item.name === e.target.value);
+                                    if (selected) {
+                                      const updated = [...newUnitCrateDrops];
+                                      updated[index] = {
+                                        ...updated[index],
+                                        name: selected.name,
+                                        rarity: selected.rarity || "Exclusive",
+                                        img: selected.img
+                                      };
+                                      setNewUnitCrateDrops(updated);
+                                    }
+                                  }}
+                                  className="w-24 shrink-0 bg-black/80 border border-white/10 rounded-lg p-1 text-[10px] text-slate-400 focus:outline-none focus:border-purple-500"
+                                >
+                                  <option value="">⚡ Pick unit</option>
+                                  {units.map(u => (
+                                    <option key={u.name} value={u.name}>{u.name}</option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="text"
+                                  placeholder="Drop Name"
+                                  value={drop.name}
+                                  onChange={e => {
+                                    const updated = [...newUnitCrateDrops];
+                                    updated[index].name = e.target.value;
+                                    setNewUnitCrateDrops(updated);
+                                  }}
+                                  className="flex-1 min-w-0 bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-xs font-bold text-white focus:outline-none focus:border-purple-500"
+                                />
+                              </div>
+
+                              <div className="col-span-3 px-1 flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="Chance %"
+                                  value={drop.chanceNum}
+                                  onChange={e => {
+                                    const val = Number(e.target.value);
+                                    const updated = [...newUnitCrateDrops];
+                                    updated[index].chanceNum = val;
+                                    updated[index].chance = `${val}%`;
+                                    setNewUnitCrateDrops(updated);
+                                  }}
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-mono font-bold text-amber-300 focus:outline-none focus:border-purple-500"
+                                />
+                                <span className="text-[10px] text-slate-500 font-mono">%</span>
+                              </div>
+
+                              <div className="col-span-3 px-1">
+                                <select
+                                  value={drop.rarity || "Exclusive"}
+                                  onChange={e => {
+                                    const updated = [...newUnitCrateDrops];
+                                    updated[index].rarity = e.target.value;
+                                    setNewUnitCrateDrops(updated);
+                                  }}
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-semibold text-slate-200 focus:outline-none focus:border-purple-500"
+                                >
+                                  {["Basic", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Exclusive", "Godly", "Event"].map(r => (
+                                    <option key={r} value={r}>{r}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="col-span-1 text-right">
+                                {newUnitCrateDrops.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = newUnitCrateDrops.filter((_, idx) => idx !== index);
+                                      setNewUnitCrateDrops(updated);
+                                    }}
+                                    className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Probability Summary Footer */}
+                        <div className="px-3 py-1.5 bg-black/80 border-t border-white/5 flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-slate-400">Total Probability Sum:</span>
+                          {(() => {
+                            const sum = Math.round(newUnitCrateDrops.reduce((acc, d) => acc + (Number(d.chanceNum) || 0), 0) * 100) / 100;
+                            const isExact = Math.abs(sum - 100) < 0.1;
+                            return (
+                              <span className={`font-black ${isExact ? "text-emerald-400" : "text-amber-400"}`}>
+                                {sum}% {isExact ? "✓ Perfect" : "(Recommended: 100%)"}
+                              </span>
+                            );
+                          })()}
+                        </div>
                       </div>
+                    ) : (
+                      /* Unit Upgrades Builder */
+                      <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden shadow-inner mb-4">
+                        <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
+                          <span className="col-span-1 text-center">LVL</span>
+                          <span className="col-span-3 text-center">UPGRADE COST</span>
+                          <span className="col-span-3 text-center font-black">DAMAGE (DMG)</span>
+                          <span className="col-span-2 text-center">COOLDOWN</span>
+                          <span className="col-span-2 text-center">RADIUS (RANGE)</span>
+                          <span className="col-span-1 text-right"></span>
+                        </div>
 
-                      <div className="divide-y divide-white/5 max-h-56 overflow-y-auto scrollbar-thin">
-                        {newUnitUpgrades.map((upgrade, index) => (
-                          <div key={index} className="grid grid-cols-12 gap-1 px-3 py-1.5 items-center hover:bg-white/[0.01]">
-                            <div className="col-span-1 text-center text-xs font-black font-mono text-white">
-                              {upgrade.lvl}
-                            </div>
+                        <div className="divide-y divide-white/5 max-h-56 overflow-y-auto scrollbar-thin">
+                          {newUnitUpgrades.map((upgrade, index) => (
+                            <div key={index} className="grid grid-cols-12 gap-1 px-3 py-1.5 items-center hover:bg-white/[0.01]">
+                              <div className="col-span-1 text-center text-xs font-black font-mono text-white">
+                                {upgrade.lvl}
+                              </div>
 
-                            <div className="col-span-3 px-1">
-                              <input
-                                type="text"
-                                placeholder="e.g. Place"
-                                value={upgrade.cost}
-                                onChange={e => {
-                                  const updated = [...newUnitUpgrades];
-                                  updated[index].cost = e.target.value;
-                                  setNewUnitUpgrades(updated);
-                                }}
-                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 font-mono"
-                              />
-                            </div>
-
-                            <div className="col-span-3 px-1">
-                              <input
-                                type="number"
-                                placeholder="Dmg"
-                                value={upgrade.dmg || ""}
-                                onChange={e => {
-                                  const updated = [...newUnitUpgrades];
-                                  updated[index].dmg = Number(e.target.value);
-                                  setNewUnitUpgrades(updated);
-                                }}
-                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono font-bold"
-                              />
-                            </div>
-
-                            <div className="col-span-2 px-1">
-                              <input
-                                type="number"
-                                step="0.01"
-                                placeholder="CD"
-                                value={upgrade.cd || ""}
-                                onChange={e => {
-                                  const updated = [...newUnitUpgrades];
-                                  updated[index].cd = Number(e.target.value);
-                                  setNewUnitUpgrades(updated);
-                                }}
-                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                              />
-                            </div>
-
-                            <div className="col-span-2 px-1">
-                              <input
-                                type="number"
-                                placeholder="Range"
-                                value={upgrade.range || ""}
-                                onChange={e => {
-                                  const updated = [...newUnitUpgrades];
-                                  updated[index].range = Number(e.target.value);
-                                  setNewUnitUpgrades(updated);
-                                }}
-                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                              />
-                            </div>
-
-                            <div className="col-span-1 text-right">
-                              {newUnitUpgrades.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const updated = newUnitUpgrades.filter((_, idx) => idx !== index).map((u, i) => ({
-                                      ...u,
-                                      lvl: i + 1,
-                                      cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
-                                    }));
+                              <div className="col-span-3 px-1">
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Place"
+                                  value={upgrade.cost}
+                                  onChange={e => {
+                                    const updated = [...newUnitUpgrades];
+                                    updated[index].cost = e.target.value;
                                     setNewUnitUpgrades(updated);
                                   }}
-                                  className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              )}
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 font-mono"
+                                />
+                              </div>
+
+                              <div className="col-span-3 px-1">
+                                <input
+                                  type="number"
+                                  placeholder="Dmg"
+                                  value={upgrade.dmg || ""}
+                                  onChange={e => {
+                                    const updated = [...newUnitUpgrades];
+                                    updated[index].dmg = Number(e.target.value);
+                                    setNewUnitUpgrades(updated);
+                                  }}
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono font-bold"
+                                />
+                              </div>
+
+                              <div className="col-span-2 px-1">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="CD"
+                                  value={upgrade.cd || ""}
+                                  onChange={e => {
+                                    const updated = [...newUnitUpgrades];
+                                    updated[index].cd = Number(e.target.value);
+                                    setNewUnitUpgrades(updated);
+                                  }}
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                                />
+                              </div>
+
+                              <div className="col-span-2 px-1">
+                                <input
+                                  type="number"
+                                  placeholder="Range"
+                                  value={upgrade.range || ""}
+                                  onChange={e => {
+                                    const updated = [...newUnitUpgrades];
+                                    updated[index].range = Number(e.target.value);
+                                    setNewUnitUpgrades(updated);
+                                  }}
+                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                                />
+                              </div>
+
+                              <div className="col-span-1 text-right">
+                                {newUnitUpgrades.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = newUnitUpgrades.filter((_, idx) => idx !== index).map((u, i) => ({
+                                        ...u,
+                                        lvl: i + 1,
+                                        cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
+                                      }));
+                                      setNewUnitUpgrades(updated);
+                                    }}
+                                    className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   <button
                     onClick={handleAddUnit}
                     className="w-full py-3 bg-gray-900 hover:bg-black text-white font-extrabold uppercase tracking-wider text-xs rounded-xl shadow-sm transition hover:scale-[1.01] cursor-pointer"
                   >
-                    Create & Publish Unit
+                    Create & Publish {newUnitRarity === "Crate" ? "Crate" : "Unit"}
                   </button>
                 </div>
 
@@ -2230,7 +2425,7 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Gem className="w-5 h-5 text-white" />
-                      <h4 className="text-sm font-black text-white uppercase tracking-wider">Unit Value Database</h4>
+                      <h4 className="text-sm font-black text-white uppercase tracking-wider">Unit & Crate Value Database</h4>
                     </div>
                     <div className="relative w-full sm:w-64">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -2246,11 +2441,11 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
 
                   <div className="bg-white/[0.01] border border-white/5 rounded-2xl overflow-hidden shadow-xl">
                     <div className="flex bg-black/40 border-b border-white/10 px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
-                      <span className="w-[28%] text-left">Unit Name & Thumbnail</span>
-                      <span className="w-[18%] text-center">Gems Value</span>
-                      <span className="w-[12%] text-center">Demand (10)</span>
-                      <span className="w-[18%] text-center">Stability</span>
-                      <span className="w-[14%] text-center">Levels/Stats</span>
+                      <span className="w-[28%] text-left">Unit / Crate & Thumbnail</span>
+                      <span className="w-[16%] text-center">Gems Value</span>
+                      <span className="w-[10%] text-center">Demand (10)</span>
+                      <span className="w-[16%] text-center">Stability</span>
+                      <span className="w-[20%] text-center">Stats / Crate Drops</span>
                       <span className="w-[10%] text-right pr-2">Delete</span>
                     </div>
 
@@ -2258,58 +2453,80 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                       {filteredUnits.map((u, idx) => {
                         // Find original index in source array
                         const originalIndex = units.findIndex(original => original.name === u.name);
+                        const isCrateUnit = u.rarity.toLowerCase() === "crate" || (u.crateDrops && u.crateDrops.length > 0) || u.name.toLowerCase().includes("crate");
 
                         return (
                           <div key={u.name} className="flex items-center px-4 py-3 hover:bg-white/[0.02] transition">
                             <div className="w-[28%] flex items-center gap-3 pr-2 min-w-0">
                               <img src={u.img} alt={u.name} onError={(e) => { e.currentTarget.src = "https://i.postimg.cc/t48x3JRN/2c2c3d84-6c43-441d-9fd2-fd7ae36bf27e.png"; }} className="w-10 h-10 object-cover rounded-lg border border-white/10 bg-black shrink-0" />
                               <div className="min-w-0 text-left">
-                                <div className="text-xs font-extrabold text-white truncate">{u.name}</div>
+                                <div className="text-xs font-extrabold text-white truncate flex items-center gap-1.5">
+                                  {u.name}
+                                  {isCrateUnit && <Package className="w-3 h-3 text-purple-400 shrink-0" />}
+                                </div>
                                 <div className="text-[9px] text-slate-500 uppercase font-mono">{u.rarity}</div>
                               </div>
                             </div>
 
-                            <div className="w-[18%] px-2 flex justify-center">
+                            <div className="w-[16%] px-2 flex justify-center">
                               <input
                                 type="number"
                                 value={u.gems}
                                 onChange={e => handleUnitChange(originalIndex, "gems", Number(e.target.value))}
-                                className="w-full max-w-[90px] bg-black/60 border border-white/10 rounded-lg p-1.5 text-center text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500"
+                                className="w-full max-w-[85px] bg-black/60 border border-white/10 rounded-lg p-1.5 text-center text-xs font-mono font-bold text-white focus:outline-none focus:border-blue-500"
                               />
                             </div>
 
-                            <div className="w-[12%] px-2 flex justify-center">
+                            <div className="w-[10%] px-2 flex justify-center">
                               <input
                                 type="number"
                                 min="0"
                                 max="10"
                                 value={u.demand}
                                 onChange={e => handleUnitChange(originalIndex, "demand", Number(e.target.value))}
-                                className="w-full max-w-[60px] bg-black/60 border border-white/10 rounded-lg p-1.5 text-center text-xs font-mono font-bold text-slate-200 focus:outline-none focus:border-blue-500"
+                                className="w-full max-w-[55px] bg-black/60 border border-white/10 rounded-lg p-1.5 text-center text-xs font-mono font-bold text-slate-200 focus:outline-none focus:border-blue-500"
                               />
                             </div>
 
-                            <div className="w-[18%] px-2 flex justify-center">
+                            <div className="w-[16%] px-2 flex justify-center">
                               <input
                                 type="text"
                                 value={u.stability}
                                 onChange={e => handleUnitChange(originalIndex, "stability", e.target.value)}
-                                className="w-full max-w-[110px] bg-black/60 border border-white/10 rounded-lg p-1.5 text-center text-xs font-semibold text-slate-300 focus:outline-none focus:border-blue-500"
+                                className="w-full max-w-[105px] bg-black/60 border border-white/10 rounded-lg p-1.5 text-center text-xs font-semibold text-slate-300 focus:outline-none focus:border-blue-500"
                               />
                             </div>
 
-                            <div className="w-[14%] px-2 flex justify-center">
-                              <button
-                                onClick={() => {
-                                  setEditingUnitUpgrades(u);
-                                  setTempUpgradesList(u.upgrades || [{ lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 }]);
-                                }}
-                                className="text-white hover:text-white p-2 hover:bg-blue-500/15 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-wider border border-white/20"
-                                title="Edit Levels & Stats"
-                              >
-                                <Sliders className="w-3.5 h-3.5 shrink-0" />
-                                <span className="hidden md:inline">Edit</span>
-                              </button>
+                            <div className="w-[20%] px-2 flex justify-center gap-1.5">
+                              {isCrateUnit ? (
+                                <button
+                                  onClick={() => {
+                                    setEditingCrateDropsUnit(u);
+                                    setTempCrateDropsList(u.crateDrops && u.crateDrops.length > 0 ? u.crateDrops : [
+                                      { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+                                      { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+                                      { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+                                    ]);
+                                  }}
+                                  className="text-purple-300 hover:text-white px-2.5 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg transition cursor-pointer flex items-center justify-center gap-1 text-[10px] font-black uppercase tracking-wider border border-purple-500/30"
+                                  title="Edit Crate Drops / Loot"
+                                >
+                                  <Package className="w-3.5 h-3.5 shrink-0 text-purple-400" />
+                                  <span>Loot ({u.crateDrops?.length || 0})</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setEditingUnitUpgrades(u);
+                                    setTempUpgradesList(u.upgrades || [{ lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 }]);
+                                  }}
+                                  className="text-white hover:text-white p-2 hover:bg-blue-500/15 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-wider border border-white/20"
+                                  title="Edit Levels & Stats"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="hidden md:inline">Stats</span>
+                                </button>
+                              )}
                             </div>
 
                             <div className="w-[10%] flex justify-end pr-2">
@@ -3949,6 +4166,256 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                     className="px-5 py-2.5 bg-white hover:bg-zinc-200 text-black font-extrabold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shadow-none"
                   >
                     Save Upgrades
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Edit Crate Drops / Loot Table Modal */}
+        <AnimatePresence>
+          {editingCrateDropsUnit && (
+            <div className="fixed inset-0 z-[115] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-[#0b0c10] border border-purple-500/30 p-6 rounded-3xl max-w-2xl w-full shadow-[0_0_50px_rgba(168,85,247,0.15)] flex flex-col gap-4 max-h-[90vh] text-left"
+              >
+                <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                  <div className="flex items-center gap-3">
+                    <img src={editingCrateDropsUnit.img} alt="" className="w-10 h-10 object-cover rounded-xl border border-purple-500/30 bg-black shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-wider font-sans flex items-center gap-2">
+                        <Package className="w-4 h-4 text-purple-400" />
+                        Edit Crate Loot & Drop Table
+                      </h4>
+                      <p className="text-[10px] text-purple-300 font-extrabold uppercase tracking-widest font-mono">{editingCrateDropsUnit.name}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setEditingCrateDropsUnit(null)}
+                    className="text-slate-400 hover:text-white p-2 hover:bg-white/5 rounded-xl transition cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">
+                    Drop Items ({tempCrateDropsList.length} items configured)
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempCrateDropsList([
+                          { name: "Scientist Camera Man", chance: "60%", chanceNum: 60, barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]", rarity: "Exclusive" },
+                          { name: "Large Scientist Camera Man", chance: "39%", chanceNum: 39, barColor: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.3)]", rarity: "Exclusive" },
+                          { name: "Engineer Camera Man", chance: "1%", chanceNum: 1, barColor: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]", rarity: "Exclusive" }
+                        ]);
+                        showToast("Loaded 3-Tier standard crate drop table (60% / 39% / 1%)!", "info");
+                      }}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 cursor-pointer transition"
+                    >
+                      ⚡ Preset (60/39/1)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempCrateDropsList([
+                          { name: "Common Unit", chance: "50%", chanceNum: 50, barColor: "bg-slate-400", rarity: "Common" },
+                          { name: "Uncommon Unit", chance: "35%", chanceNum: 35, barColor: "bg-emerald-500", rarity: "Uncommon" },
+                          { name: "Rare Unit", chance: "14%", chanceNum: 14, barColor: "bg-sky-400", rarity: "Rare" },
+                          { name: "Exclusive Unit", chance: "1%", chanceNum: 1, barColor: "bg-amber-500", rarity: "Exclusive" }
+                        ]);
+                        showToast("Loaded 4-Tier drop table preset (50% / 35% / 14% / 1%)!", "info");
+                      }}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 cursor-pointer transition"
+                    >
+                      ⚡ Preset (50/35/14/1)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const total = tempCrateDropsList.reduce((acc, curr) => acc + (Number(curr.chanceNum) || 0), 0);
+                        if (total <= 0) return;
+                        const normalized = tempCrateDropsList.map(d => {
+                          const ratio = ((Number(d.chanceNum) || 0) / total) * 100;
+                          const rounded = Math.round(ratio * 10) / 10;
+                          return { ...d, chanceNum: rounded, chance: `${rounded}%` };
+                        });
+                        setTempCrateDropsList(normalized);
+                        showToast("Normalized all drop chances to exactly 100%!", "success");
+                      }}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
+                    >
+                      ⚡ 100% Total
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTempCrateDropsList([
+                          ...tempCrateDropsList,
+                          {
+                            name: "New Drop Unit",
+                            chance: "10%",
+                            chanceNum: 10,
+                            rarity: "Exclusive",
+                            barColor: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                          }
+                        ]);
+                      }}
+                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-zinc-800 hover:bg-zinc-700 text-slate-300 border border-white/5 cursor-pointer transition flex items-center gap-1"
+                    >
+                      <Plus className="w-3 h-3" /> Add Drop
+                    </button>
+                  </div>
+                </div>
+
+                {/* Drop editing list */}
+                <div className="bg-black/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col min-h-0 flex-1 shadow-inner">
+                  <div className="grid grid-cols-12 gap-1 px-4 py-2.5 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
+                    <span className="col-span-6 text-left">DROP ITEM / UNIT NAME</span>
+                    <span className="col-span-3 text-center">CHANCE (%)</span>
+                    <span className="col-span-2 text-center">RARITY</span>
+                    <span className="col-span-1 text-right"></span>
+                  </div>
+
+                  <div className="divide-y divide-white/5 overflow-y-auto scrollbar-thin max-h-[45vh]">
+                    {tempCrateDropsList.map((drop, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-1.5 px-4 py-2.5 items-center hover:bg-white/[0.01]">
+                        <div className="col-span-6 flex items-center gap-2">
+                          <select
+                            onChange={e => {
+                              const selected = units.find(item => item.name === e.target.value);
+                              if (selected) {
+                                const updated = [...tempCrateDropsList];
+                                updated[index] = {
+                                  ...updated[index],
+                                  name: selected.name,
+                                  rarity: selected.rarity || "Exclusive",
+                                  img: selected.img
+                                };
+                                setTempCrateDropsList(updated);
+                              }
+                            }}
+                            className="w-28 shrink-0 bg-black/80 border border-white/10 rounded-lg p-1 text-[10px] text-slate-400 focus:outline-none focus:border-purple-500"
+                          >
+                            <option value="">⚡ Pick unit</option>
+                            {units.map(u => (
+                              <option key={u.name} value={u.name}>{u.name}</option>
+                            ))}
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Unit Name"
+                            value={drop.name}
+                            onChange={e => {
+                              const updated = [...tempCrateDropsList];
+                              updated[index].name = e.target.value;
+                              setTempCrateDropsList(updated);
+                            }}
+                            className="flex-1 min-w-0 bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-xs font-bold text-white focus:outline-none focus:border-purple-500"
+                          />
+                        </div>
+
+                        <div className="col-span-3 px-1 flex items-center gap-1">
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="60"
+                            value={drop.chanceNum}
+                            onChange={e => {
+                              const val = Number(e.target.value);
+                              const updated = [...tempCrateDropsList];
+                              updated[index].chanceNum = val;
+                              updated[index].chance = `${val}%`;
+                              setTempCrateDropsList(updated);
+                            }}
+                            className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-mono font-bold text-amber-300 focus:outline-none focus:border-purple-500"
+                          />
+                          <span className="text-[10px] text-slate-500 font-mono">%</span>
+                        </div>
+
+                        <div className="col-span-2 px-1">
+                          <select
+                            value={drop.rarity || "Exclusive"}
+                            onChange={e => {
+                              const updated = [...tempCrateDropsList];
+                              updated[index].rarity = e.target.value;
+                              setTempCrateDropsList(updated);
+                            }}
+                            className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1 text-center text-xs font-semibold text-slate-200 focus:outline-none focus:border-purple-500"
+                          >
+                            {["Basic", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Exclusive", "Godly", "Event"].map(r => (
+                              <option key={r} value={r}>{r}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="col-span-1 text-right">
+                          {tempCrateDropsList.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = tempCrateDropsList.filter((_, idx) => idx !== index);
+                                setTempCrateDropsList(updated);
+                              }}
+                              className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Total Probability Summary Footer */}
+                  <div className="px-4 py-2 bg-black/80 border-t border-white/5 flex items-center justify-between text-xs font-mono">
+                    <span className="text-slate-400">Total Probability Sum:</span>
+                    {(() => {
+                      const sum = Math.round(tempCrateDropsList.reduce((acc, d) => acc + (Number(d.chanceNum) || 0), 0) * 100) / 100;
+                      const isExact = Math.abs(sum - 100) < 0.1;
+                      return (
+                        <span className={`font-black ${isExact ? "text-emerald-400" : "text-amber-400"}`}>
+                          {sum}% {isExact ? "✓ Perfect (100%)" : "⚠️ Recommended: 100% total"}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 justify-end mt-2">
+                  <button
+                    onClick={() => setEditingCrateDropsUnit(null)}
+                    className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const updatedUnits = [...units];
+                      const idx = updatedUnits.findIndex(u => u.name === editingCrateDropsUnit.name);
+                      if (idx !== -1) {
+                        updatedUnits[idx] = {
+                          ...updatedUnits[idx],
+                          crateDrops: tempCrateDropsList
+                        };
+                        saveUnitsToServer(updatedUnits).then(success => {
+                          if (success) {
+                            setUnits(updatedUnits);
+                            showToast(`Updated crate drops for ${editingCrateDropsUnit.name}!`, "success");
+                            setEditingCrateDropsUnit(null);
+                          }
+                        });
+                      }
+                    }}
+                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                  >
+                    Save Crate Drops
                   </button>
                 </div>
               </motion.div>

@@ -449,8 +449,27 @@ function cleanAndSyncUnits() {
   });
 }
 
+function cleanAndSyncSignatures() {
+  const map = new Map<string, any>();
+  defaultSignatures.forEach(s => map.set(s.name.toLowerCase(), { ...s }));
+  if (Array.isArray(dbState.signatures)) {
+    dbState.signatures.forEach((s: any) => {
+      if (s && s.name) {
+        const key = s.name.toLowerCase();
+        if (map.has(key)) {
+          const def = map.get(key);
+          map.set(key, { ...def, ...s });
+        } else {
+          map.set(key, s);
+        }
+      }
+    });
+  }
+  dbState.signatures = Array.from(map.values());
+}
+
 cleanAndSyncUnits();
-dbState.signatures = [...defaultSignatures];
+cleanAndSyncSignatures();
 
 const defaultRoadmap = [
   {
@@ -634,7 +653,12 @@ async function loadDbFromFirestore() {
       dbState.units = dataMap.units.units;
       cleanAndSyncUnits();
     }
-    dbState.signatures = [...defaultSignatures];
+    if (dataMap.signatures && Array.isArray(dataMap.signatures.signatures) && dataMap.signatures.signatures.length > 0) {
+      dbState.signatures = dataMap.signatures.signatures;
+      cleanAndSyncSignatures();
+    } else {
+      dbState.signatures = [...defaultSignatures];
+    }
     if (dataMap.trades && Array.isArray(dataMap.trades.trades)) {
       activeTrades.length = 0;
       activeTrades.push(...dataMap.trades.trades);
