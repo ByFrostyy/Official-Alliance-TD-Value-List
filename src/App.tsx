@@ -690,9 +690,14 @@ export default function App() {
               </div>
             </div>
             <div className="text-left min-w-0">
-              <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-sans font-black tracking-wider text-white uppercase leading-none">
-                ALLIANCE <span className="text-zinc-500">: TD VALUES</span>
-              </h1>
+              <div className="flex items-center flex-wrap gap-2">
+                <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-sans font-black tracking-wider text-white uppercase leading-none">
+                  OFFICIAL ALLIANCE <span className="text-zinc-500">: TD VALUES</span>
+                </h1>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  OFFICIAL
+                </span>
+              </div>
               <p className="text-[9px] sm:text-[10px] text-zinc-400 font-mono tracking-widest uppercase mt-1.5 sm:mt-2">OFFICIAL ALLIANCE: TD MARKETPLACE & TRADING RESOURCE</p>
             </div>
           </div>

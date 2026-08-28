@@ -1,6 +1,6 @@
 {
-  "name": "Alliance: TD Value List",
-  "description": "Value List for Origin TTD, featuring trading calculator, sign values, up-to-date values, updates log, and countdown timer.",
+  "name": "Official Alliance: TD Value List",
+  "description": "Official Value List for Alliance: TD, featuring trading calculator, sign values, up-to-date values, updates log, and countdown timer.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

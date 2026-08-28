@@ -244,7 +244,7 @@ export const Yl: Unit[] = [
   {
     name: "TV Woman",
     rarity: "Exclusive",
-    img: "https://i.postimg.cc/SxGvpcmC/16-20260701170954.png",
+    img: "https://i.postimg.cc/P5264KSn/image.png",
     gems: 950,
     tokenValue: "950",
     shinyValue: "1,900",
