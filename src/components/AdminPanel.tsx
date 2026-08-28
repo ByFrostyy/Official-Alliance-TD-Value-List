@@ -144,6 +144,7 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
   const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
 
   // Unit Upgrades / Levels Creator State
+  const [newUnitUpgradeMode, setNewUnitUpgradeMode] = useState<"combat" | "booster">("combat");
   const [newUnitUpgrades, setNewUnitUpgrades] = useState<Upgrade[]>([
     { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 }
   ]);
@@ -157,6 +158,7 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
 
   // Editing Unit Upgrades Modal State
   const [editingUnitUpgrades, setEditingUnitUpgrades] = useState<Unit | null>(null);
+  const [editUnitUpgradeMode, setEditUnitUpgradeMode] = useState<"combat" | "booster">("combat");
   const [tempUpgradesList, setTempUpgradesList] = useState<Upgrade[]>([]);
 
   // Editing Crate Drops Modal State
@@ -2135,42 +2137,69 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                           </button>
                         </div>
                       ) : (
-                        <div className="flex flex-wrap gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const basePlace = Number(newUnitPlaceCost) || 1000;
-                              setNewUnitUpgrades([
-                                { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
-                                { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
-                                { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
-                                { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
-                                { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 }
-                              ]);
-                              showToast("Generated 5 balanced levels based on Place Cost!", "info");
-                            }}
-                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
-                          >
-                            ⚡ Auto 5 Lvls
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const basePlace = Number(newUnitPlaceCost) || 1000;
-                              setNewUnitUpgrades([
-                                { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
-                                { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
-                                { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
-                                { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
-                                { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 },
-                                { lvl: 6, cost: `$${Math.round(basePlace * 12)}`, dmg: 8000, cd: 0.3, range: 50 }
-                              ]);
-                              showToast("Generated 6 balanced levels based on Place Cost!", "info");
-                            }}
-                            className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
-                          >
-                            ⚡ Auto 6 Lvls
-                          </button>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <div className="flex bg-black/60 border border-white/10 rounded-lg p-0.5 mr-1">
+                            <button
+                              type="button"
+                              onClick={() => setNewUnitUpgradeMode("combat")}
+                              className={`px-2 py-1 text-[9px] font-black uppercase rounded-md transition cursor-pointer ${
+                                newUnitUpgradeMode === "combat"
+                                  ? "bg-white/20 text-white shadow-sm"
+                                  : "text-slate-400 hover:text-white"
+                              }`}
+                            >
+                              ⚔️ Combat
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setNewUnitUpgradeMode("booster")}
+                              className={`px-2 py-1 text-[9px] font-black uppercase rounded-md transition cursor-pointer ${
+                                newUnitUpgradeMode === "booster"
+                                  ? "bg-purple-500/30 text-purple-300 border border-purple-500/40 shadow-sm"
+                                  : "text-slate-400 hover:text-purple-300"
+                              }`}
+                            >
+                              ⚡ Booster (3 Buffs)
+                            </button>
+                          </div>
+
+                          {newUnitUpgradeMode === "combat" ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const basePlace = Number(newUnitPlaceCost) || 1000;
+                                setNewUnitUpgrades([
+                                  { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
+                                  { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
+                                  { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
+                                  { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
+                                  { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 }
+                                ]);
+                                showToast("Generated 5 balanced Combat levels!", "info");
+                              }}
+                              className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
+                            >
+                              ⚡ Auto 5 Lvls
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const basePlace = Number(newUnitPlaceCost) || 1000;
+                                setNewUnitUpgrades([
+                                  { lvl: 1, cost: "Place", dmgBuff: "+15%", rangeBuff: "+10%", speedBuff: "+10%", range: 16 },
+                                  { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmgBuff: "+25%", rangeBuff: "+15%", speedBuff: "+20%", range: 18 },
+                                  { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmgBuff: "+35%", rangeBuff: "+20%", speedBuff: "+30%", range: 20 },
+                                  { lvl: 4, cost: `$${Math.round(basePlace * 6)}`, dmgBuff: "+50%", rangeBuff: "+25%", speedBuff: "+40%", range: 24 }
+                                ]);
+                                showToast("Generated 3-Buff Booster presets!", "info");
+                              }}
+                              className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 cursor-pointer transition"
+                            >
+                              ⚡ 3-Buff Preset
+                            </button>
+                          )}
+
                           <button
                             type="button"
                             onClick={() => {
@@ -2178,16 +2207,31 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                               const prevLvl = newUnitUpgrades[newUnitUpgrades.length - 1];
                               const prevCost = prevLvl && prevLvl.cost !== "Place" ? parseInt(prevLvl.cost.replace(/[^0-9]/g, ""), 10) : 1000;
                               const nextCost = prevLvl ? (isNaN(prevCost) ? 1000 : Math.round(prevCost * 1.8)) : 1000;
-                              setNewUnitUpgrades([
-                                ...newUnitUpgrades,
-                                {
-                                  lvl: nextLvl,
-                                  cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
-                                  dmg: prevLvl ? Math.round((prevLvl.dmg || 500) * 1.6) : 500,
-                                  cd: prevLvl ? Number(((prevLvl.cd || 1) * 0.9).toFixed(2)) : 1,
-                                  range: prevLvl ? Math.round((prevLvl.range || 20) * 1.2) : 20
-                                }
-                              ]);
+                              
+                              if (newUnitUpgradeMode === "booster") {
+                                setNewUnitUpgrades([
+                                  ...newUnitUpgrades,
+                                  {
+                                    lvl: nextLvl,
+                                    cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
+                                    dmgBuff: prevLvl && prevLvl.dmgBuff ? `+${(parseInt(prevLvl.dmgBuff.replace(/[^0-9]/g, ""), 10) || 15) + 10}%` : "+20%",
+                                    rangeBuff: prevLvl && prevLvl.rangeBuff ? `+${(parseInt(prevLvl.rangeBuff.replace(/[^0-9]/g, ""), 10) || 10) + 5}%` : "+15%",
+                                    speedBuff: prevLvl && prevLvl.speedBuff ? `+${(parseInt(prevLvl.speedBuff.replace(/[^0-9]/g, ""), 10) || 10) + 10}%` : "+15%",
+                                    range: prevLvl ? Math.round((prevLvl.range || 16) * 1.15) : 16
+                                  }
+                                ]);
+                              } else {
+                                setNewUnitUpgrades([
+                                  ...newUnitUpgrades,
+                                  {
+                                    lvl: nextLvl,
+                                    cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
+                                    dmg: prevLvl && typeof prevLvl.dmg === "number" ? Math.round(prevLvl.dmg * 1.6) : 500,
+                                    cd: prevLvl && prevLvl.cd ? Number((prevLvl.cd * 0.9).toFixed(2)) : 1,
+                                    range: prevLvl && prevLvl.range ? Math.round(prevLvl.range * 1.2) : 20
+                                  }
+                                ]);
+                              }
                             }}
                             className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-zinc-800 hover:bg-zinc-700 text-slate-300 border border-white/5 cursor-pointer transition flex items-center gap-1"
                           >
@@ -2314,100 +2358,216 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                     ) : (
                       /* Unit Upgrades Builder */
                       <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden shadow-inner mb-4">
-                        <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
-                          <span className="col-span-1 text-center">LVL</span>
-                          <span className="col-span-3 text-center">UPGRADE COST</span>
-                          <span className="col-span-3 text-center font-black">DAMAGE (DMG)</span>
-                          <span className="col-span-2 text-center">COOLDOWN</span>
-                          <span className="col-span-2 text-center">RADIUS (RANGE)</span>
-                          <span className="col-span-1 text-right"></span>
-                        </div>
-
-                        <div className="divide-y divide-white/5 max-h-56 overflow-y-auto scrollbar-thin">
-                          {newUnitUpgrades.map((upgrade, index) => (
-                            <div key={index} className="grid grid-cols-12 gap-1 px-3 py-1.5 items-center hover:bg-white/[0.01]">
-                              <div className="col-span-1 text-center text-xs font-black font-mono text-white">
-                                {upgrade.lvl}
-                              </div>
-
-                              <div className="col-span-3 px-1">
-                                <input
-                                  type="text"
-                                  placeholder="e.g. Place"
-                                  value={upgrade.cost}
-                                  onChange={e => {
-                                    const updated = [...newUnitUpgrades];
-                                    updated[index].cost = e.target.value;
-                                    setNewUnitUpgrades(updated);
-                                  }}
-                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 font-mono"
-                                />
-                              </div>
-
-                              <div className="col-span-3 px-1">
-                                <input
-                                  type="number"
-                                  placeholder="Dmg"
-                                  value={upgrade.dmg || ""}
-                                  onChange={e => {
-                                    const updated = [...newUnitUpgrades];
-                                    updated[index].dmg = Number(e.target.value);
-                                    setNewUnitUpgrades(updated);
-                                  }}
-                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono font-bold"
-                                />
-                              </div>
-
-                              <div className="col-span-2 px-1">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  placeholder="CD"
-                                  value={upgrade.cd || ""}
-                                  onChange={e => {
-                                    const updated = [...newUnitUpgrades];
-                                    updated[index].cd = Number(e.target.value);
-                                    setNewUnitUpgrades(updated);
-                                  }}
-                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                                />
-                              </div>
-
-                              <div className="col-span-2 px-1">
-                                <input
-                                  type="number"
-                                  placeholder="Range"
-                                  value={upgrade.range || ""}
-                                  onChange={e => {
-                                    const updated = [...newUnitUpgrades];
-                                    updated[index].range = Number(e.target.value);
-                                    setNewUnitUpgrades(updated);
-                                  }}
-                                  className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                                />
-                              </div>
-
-                              <div className="col-span-1 text-right">
-                                {newUnitUpgrades.length > 1 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const updated = newUnitUpgrades.filter((_, idx) => idx !== index).map((u, i) => ({
-                                        ...u,
-                                        lvl: i + 1,
-                                        cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
-                                      }));
-                                      setNewUnitUpgrades(updated);
-                                    }}
-                                    className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                              </div>
+                        {newUnitUpgradeMode === "booster" ? (
+                          <>
+                            <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-purple-950/20 border-b border-purple-500/10 text-[9px] font-black text-slate-400 uppercase tracking-widest select-none font-mono">
+                              <span className="col-span-1 text-center">LVL</span>
+                              <span className="col-span-3 text-center">COST</span>
+                              <span className="col-span-2 text-center text-red-400 font-black">⚔️ DMG BUFF</span>
+                              <span className="col-span-2 text-center text-blue-400 font-black">🎯 RANGE BUFF</span>
+                              <span className="col-span-2 text-center text-amber-400 font-black">⚡ ATK SPD BUFF</span>
+                              <span className="col-span-1 text-center">RADIUS</span>
+                              <span className="col-span-1 text-right"></span>
                             </div>
-                          ))}
-                        </div>
+
+                            <div className="divide-y divide-white/5 max-h-56 overflow-y-auto scrollbar-thin">
+                              {newUnitUpgrades.map((upgrade, index) => (
+                                <div key={index} className="grid grid-cols-12 gap-1 px-3 py-1.5 items-center hover:bg-white/[0.01]">
+                                  <div className="col-span-1 text-center text-xs font-black font-mono text-white">
+                                    {upgrade.lvl}
+                                  </div>
+
+                                  <div className="col-span-3 px-0.5">
+                                    <input
+                                      type="text"
+                                      placeholder="Place"
+                                      value={upgrade.cost}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].cost = e.target.value;
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1 text-center text-xs font-semibold text-white focus:outline-none focus:border-purple-500 font-mono"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-2 px-0.5">
+                                    <input
+                                      type="text"
+                                      placeholder="+20%"
+                                      value={upgrade.dmgBuff || ""}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].dmgBuff = e.target.value;
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-red-500/20 focus:border-red-400 rounded-lg py-1 px-1 text-center text-xs text-red-300 focus:outline-none font-mono font-bold"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-2 px-0.5">
+                                    <input
+                                      type="text"
+                                      placeholder="+15%"
+                                      value={upgrade.rangeBuff || ""}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].rangeBuff = e.target.value;
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-blue-500/20 focus:border-blue-400 rounded-lg py-1 px-1 text-center text-xs text-blue-300 focus:outline-none font-mono font-bold"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-2 px-0.5">
+                                    <input
+                                      type="text"
+                                      placeholder="+25%"
+                                      value={upgrade.speedBuff || ""}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].speedBuff = e.target.value;
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-amber-500/20 focus:border-amber-400 rounded-lg py-1 px-1 text-center text-xs text-amber-300 focus:outline-none font-mono font-bold"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-1 px-0.5">
+                                    <input
+                                      type="number"
+                                      placeholder="Rng"
+                                      value={upgrade.range || ""}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].range = Number(e.target.value);
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-0.5 text-center text-xs text-white focus:outline-none focus:border-purple-500 font-mono"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-1 text-right">
+                                    {newUnitUpgrades.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = newUnitUpgrades.filter((_, idx) => idx !== index).map((u, i) => ({
+                                            ...u,
+                                            lvl: i + 1,
+                                            cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
+                                          }));
+                                          setNewUnitUpgrades(updated);
+                                        }}
+                                        className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
+                              <span className="col-span-1 text-center">LVL</span>
+                              <span className="col-span-3 text-center">UPGRADE COST</span>
+                              <span className="col-span-3 text-center font-black text-white">DAMAGE (DMG)</span>
+                              <span className="col-span-2 text-center">COOLDOWN</span>
+                              <span className="col-span-2 text-center">RADIUS (RANGE)</span>
+                              <span className="col-span-1 text-right"></span>
+                            </div>
+
+                            <div className="divide-y divide-white/5 max-h-56 overflow-y-auto scrollbar-thin">
+                              {newUnitUpgrades.map((upgrade, index) => (
+                                <div key={index} className="grid grid-cols-12 gap-1 px-3 py-1.5 items-center hover:bg-white/[0.01]">
+                                  <div className="col-span-1 text-center text-xs font-black font-mono text-white">
+                                    {upgrade.lvl}
+                                  </div>
+
+                                  <div className="col-span-3 px-1">
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. Place"
+                                      value={upgrade.cost}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].cost = e.target.value;
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 font-mono"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-3 px-1">
+                                    <input
+                                      type="number"
+                                      placeholder="Dmg"
+                                      value={typeof upgrade.dmg === "number" ? upgrade.dmg : ""}
+                                      onChange={e => {
+                                        const val = Number(e.target.value);
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].dmg = isNaN(val) ? undefined : val;
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-white/10 focus:border-blue-400 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none font-mono font-bold"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-2 px-1">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      placeholder="CD"
+                                      value={upgrade.cd || ""}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].cd = Number(e.target.value);
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-2 px-1">
+                                    <input
+                                      type="number"
+                                      placeholder="Range"
+                                      value={upgrade.range || ""}
+                                      onChange={e => {
+                                        const updated = [...newUnitUpgrades];
+                                        updated[index].range = Number(e.target.value);
+                                        setNewUnitUpgrades(updated);
+                                      }}
+                                      className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1.5 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                                    />
+                                  </div>
+
+                                  <div className="col-span-1 text-right">
+                                    {newUnitUpgrades.length > 1 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = newUnitUpgrades.filter((_, idx) => idx !== index).map((u, i) => ({
+                                            ...u,
+                                            lvl: i + 1,
+                                            cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
+                                          }));
+                                          setNewUnitUpgrades(updated);
+                                        }}
+                                        className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2518,6 +2678,8 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                                 <button
                                   onClick={() => {
                                     setEditingUnitUpgrades(u);
+                                    const isBooster = (u.upgrades || []).some(lvl => !!(lvl.dmgBuff || lvl.rangeBuff || lvl.speedBuff));
+                                    setEditUnitUpgradeMode(isBooster ? "booster" : "combat");
                                     setTempUpgradesList(u.upgrades || [{ lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 }]);
                                   }}
                                   className="text-white hover:text-white p-2 hover:bg-blue-500/15 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-wider border border-white/20"
@@ -4002,28 +4164,75 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">
-                    Upgrades Stream ({tempUpgradesList.length} Levels)
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const basePlace = editingUnitUpgrades.placeCost || 1000;
-                        setTempUpgradesList([
-                          { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
-                          { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
-                          { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
-                          { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
-                          { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 }
-                        ]);
-                        showToast("Generated 5 standard levels based on Place Cost!", "info");
-                      }}
-                      className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
-                    >
-                      ⚡ Auto 5 Lvls
-                    </button>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">
+                      Levels ({tempUpgradesList.length})
+                    </span>
+                    <div className="flex bg-black/60 border border-white/10 rounded-lg p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setEditUnitUpgradeMode("combat")}
+                        className={`px-2 py-1 text-[9px] font-black uppercase rounded-md transition cursor-pointer ${
+                          editUnitUpgradeMode === "combat"
+                            ? "bg-white/20 text-white shadow-sm"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        ⚔️ Combat
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditUnitUpgradeMode("booster")}
+                        className={`px-2 py-1 text-[9px] font-black uppercase rounded-md transition cursor-pointer ${
+                          editUnitUpgradeMode === "booster"
+                            ? "bg-purple-500/30 text-purple-300 border border-purple-500/40 shadow-sm"
+                            : "text-slate-400 hover:text-purple-300"
+                        }`}
+                      >
+                        ⚡ Booster (3 Buffs)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {editUnitUpgradeMode === "combat" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const basePlace = editingUnitUpgrades ? editingUnitUpgrades.placeCost || 1000 : 1000;
+                          setTempUpgradesList([
+                            { lvl: 1, cost: "Place", dmg: 500, cd: 1, range: 20 },
+                            { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmg: 1000, cd: 0.8, range: 25 },
+                            { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmg: 2200, cd: 0.6, range: 30 },
+                            { lvl: 4, cost: `$${Math.round(basePlace * 5)}`, dmg: 3800, cd: 0.5, range: 35 },
+                            { lvl: 5, cost: `$${Math.round(basePlace * 8)}`, dmg: 5500, cd: 0.4, range: 45 }
+                          ]);
+                          showToast("Generated 5 standard Combat levels!", "info");
+                        }}
+                        className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer transition"
+                      >
+                        ⚡ Auto 5 Lvls
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const basePlace = editingUnitUpgrades ? editingUnitUpgrades.placeCost || 1000 : 1000;
+                          setTempUpgradesList([
+                            { lvl: 1, cost: "Place", dmgBuff: "+15%", rangeBuff: "+10%", speedBuff: "+10%", range: 16 },
+                            { lvl: 2, cost: `$${Math.round(basePlace * 1.5)}`, dmgBuff: "+25%", rangeBuff: "+15%", speedBuff: "+20%", range: 18 },
+                            { lvl: 3, cost: `$${Math.round(basePlace * 3)}`, dmgBuff: "+35%", rangeBuff: "+20%", speedBuff: "+30%", range: 20 },
+                            { lvl: 4, cost: `$${Math.round(basePlace * 6)}`, dmgBuff: "+50%", rangeBuff: "+25%", speedBuff: "+40%", range: 24 }
+                          ]);
+                          showToast("Loaded 3-Buff Booster preset!", "info");
+                        }}
+                        className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 cursor-pointer transition"
+                      >
+                        ⚡ 3-Buff Preset
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={() => {
@@ -4031,16 +4240,31 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                         const prevLvl = tempUpgradesList[tempUpgradesList.length - 1];
                         const prevCost = prevLvl && prevLvl.cost !== "Place" ? parseInt(prevLvl.cost.replace(/[^0-9]/g, ""), 10) : 1000;
                         const nextCost = prevLvl ? (isNaN(prevCost) ? 1000 : Math.round(prevCost * 1.8)) : 1000;
-                        setTempUpgradesList([
-                          ...tempUpgradesList,
-                          {
-                            lvl: nextLvl,
-                            cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
-                            dmg: prevLvl ? Math.round((prevLvl.dmg || 500) * 1.6) : 500,
-                            cd: prevLvl ? Number(((prevLvl.cd || 1) * 0.9).toFixed(2)) : 1,
-                            range: prevLvl ? Math.round((prevLvl.range || 20) * 1.2) : 20
-                          }
-                        ]);
+
+                        if (editUnitUpgradeMode === "booster") {
+                          setTempUpgradesList([
+                            ...tempUpgradesList,
+                            {
+                              lvl: nextLvl,
+                              cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
+                              dmgBuff: prevLvl && prevLvl.dmgBuff ? `+${(parseInt(prevLvl.dmgBuff.replace(/[^0-9]/g, ""), 10) || 15) + 10}%` : "+20%",
+                              rangeBuff: prevLvl && prevLvl.rangeBuff ? `+${(parseInt(prevLvl.rangeBuff.replace(/[^0-9]/g, ""), 10) || 10) + 5}%` : "+15%",
+                              speedBuff: prevLvl && prevLvl.speedBuff ? `+${(parseInt(prevLvl.speedBuff.replace(/[^0-9]/g, ""), 10) || 10) + 10}%` : "+15%",
+                              range: prevLvl ? Math.round((prevLvl.range || 16) * 1.15) : 16
+                            }
+                          ]);
+                        } else {
+                          setTempUpgradesList([
+                            ...tempUpgradesList,
+                            {
+                              lvl: nextLvl,
+                              cost: nextLvl === 1 ? "Place" : `$${nextCost}`,
+                              dmg: prevLvl && typeof prevLvl.dmg === "number" ? Math.round(prevLvl.dmg * 1.6) : 500,
+                              cd: prevLvl && prevLvl.cd ? Number((prevLvl.cd * 0.9).toFixed(2)) : 1,
+                              range: prevLvl && prevLvl.range ? Math.round(prevLvl.range * 1.2) : 20
+                            }
+                          ]);
+                        }
                       }}
                       className="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg bg-zinc-800 hover:bg-zinc-700 text-slate-300 border border-white/5 cursor-pointer transition flex items-center gap-1"
                     >
@@ -4051,91 +4275,210 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
 
                 {/* Level editing form stream */}
                 <div className="bg-black/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col min-h-0 flex-1 shadow-inner">
-                  <div className="grid grid-cols-12 gap-1 px-4 py-2.5 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
-                    <span className="col-span-1 text-center">LVL</span>
-                    <span className="col-span-3 text-center">UPGRADE COST</span>
-                    <span className="col-span-3 text-center">DAMAGE (DMG)</span>
-                    <span className="col-span-2 text-center">COOLDOWN</span>
-                    <span className="col-span-2 text-center">RADIUS (RANGE)</span>
-                    <span className="col-span-1 text-right"></span>
-                  </div>
-
-                  <div className="divide-y divide-white/5 overflow-y-auto scrollbar-thin max-h-[45vh]">
-                    {tempUpgradesList.map((upgrade, index) => (
-                      <div key={index} className="grid grid-cols-12 gap-1 px-4 py-2 items-center hover:bg-white/[0.01]">
-                        <div className="col-span-1 text-center text-xs font-black font-mono text-white">
-                          {upgrade.lvl}
-                        </div>
-                        <div className="col-span-3 px-1">
-                          <input
-                            type="text"
-                            value={upgrade.cost}
-                            onChange={e => {
-                              const updated = [...tempUpgradesList];
-                              updated[index].cost = e.target.value;
-                              setTempUpgradesList(updated);
-                            }}
-                            className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 font-mono"
-                          />
-                        </div>
-                        <div className="col-span-3 px-1">
-                          <input
-                            type="number"
-                            value={upgrade.dmg || ""}
-                            onChange={e => {
-                              const updated = [...tempUpgradesList];
-                              updated[index].dmg = Number(e.target.value);
-                              setTempUpgradesList(updated);
-                            }}
-                            className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono font-bold"
-                          />
-                        </div>
-                        <div className="col-span-2 px-1">
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={upgrade.cd || ""}
-                            onChange={e => {
-                              const updated = [...tempUpgradesList];
-                              updated[index].cd = Number(e.target.value);
-                              setTempUpgradesList(updated);
-                            }}
-                            className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                          />
-                        </div>
-                        <div className="col-span-2 px-1">
-                          <input
-                            type="number"
-                            value={upgrade.range || ""}
-                            onChange={e => {
-                              const updated = [...tempUpgradesList];
-                              updated[index].range = Number(e.target.value);
-                              setTempUpgradesList(updated);
-                            }}
-                            className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
-                          />
-                        </div>
-                        <div className="col-span-1 text-right">
-                          {tempUpgradesList.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updated = tempUpgradesList.filter((_, idx) => idx !== index).map((u, i) => ({
-                                  ...u,
-                                  lvl: i + 1,
-                                  cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
-                                }));
-                                setTempUpgradesList(updated);
-                              }}
-                              className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
+                  {editUnitUpgradeMode === "booster" ? (
+                    <>
+                      <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-purple-950/20 border-b border-purple-500/10 text-[9px] font-black text-slate-400 uppercase tracking-widest select-none font-mono">
+                        <span className="col-span-1 text-center">LVL</span>
+                        <span className="col-span-3 text-center">COST</span>
+                        <span className="col-span-2 text-center text-red-400 font-black">⚔️ DMG BUFF</span>
+                        <span className="col-span-2 text-center text-blue-400 font-black">🎯 RANGE BUFF</span>
+                        <span className="col-span-2 text-center text-amber-400 font-black">⚡ ATK SPD BUFF</span>
+                        <span className="col-span-1 text-center">RADIUS</span>
+                        <span className="col-span-1 text-right"></span>
                       </div>
-                    ))}
-                  </div>
+
+                      <div className="divide-y divide-white/5 overflow-y-auto scrollbar-thin max-h-[45vh]">
+                        {tempUpgradesList.map((upgrade, index) => (
+                          <div key={index} className="grid grid-cols-12 gap-1 px-3 py-1.5 items-center hover:bg-white/[0.01]">
+                            <div className="col-span-1 text-center text-xs font-black font-mono text-white">
+                              {upgrade.lvl}
+                            </div>
+
+                            <div className="col-span-3 px-0.5">
+                              <input
+                                type="text"
+                                placeholder="Place"
+                                value={upgrade.cost}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].cost = e.target.value;
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-1 text-center text-xs font-semibold text-white focus:outline-none focus:border-purple-500 font-mono"
+                              />
+                            </div>
+
+                            <div className="col-span-2 px-0.5">
+                              <input
+                                type="text"
+                                placeholder="+20%"
+                                value={upgrade.dmgBuff || ""}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].dmgBuff = e.target.value;
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-red-500/20 focus:border-red-400 rounded-lg py-1 px-1 text-center text-xs text-red-300 focus:outline-none font-mono font-bold"
+                              />
+                            </div>
+
+                            <div className="col-span-2 px-0.5">
+                              <input
+                                type="text"
+                                placeholder="+15%"
+                                value={upgrade.rangeBuff || ""}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].rangeBuff = e.target.value;
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-blue-500/20 focus:border-blue-400 rounded-lg py-1 px-1 text-center text-xs text-blue-300 focus:outline-none font-mono font-bold"
+                              />
+                            </div>
+
+                            <div className="col-span-2 px-0.5">
+                              <input
+                                type="text"
+                                placeholder="+25%"
+                                value={upgrade.speedBuff || ""}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].speedBuff = e.target.value;
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-amber-500/20 focus:border-amber-400 rounded-lg py-1 px-1 text-center text-xs text-amber-300 focus:outline-none font-mono font-bold"
+                              />
+                            </div>
+
+                            <div className="col-span-1 px-0.5">
+                              <input
+                                type="number"
+                                placeholder="Rng"
+                                value={upgrade.range || ""}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].range = Number(e.target.value);
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-0.5 text-center text-xs text-white focus:outline-none focus:border-purple-500 font-mono"
+                              />
+                            </div>
+
+                            <div className="col-span-1 text-right">
+                              {tempUpgradesList.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = tempUpgradesList.filter((_, idx) => idx !== index).map((u, i) => ({
+                                      ...u,
+                                      lvl: i + 1,
+                                      cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
+                                    }));
+                                    setTempUpgradesList(updated);
+                                  }}
+                                  className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-12 gap-1 px-4 py-2.5 bg-black/60 text-[9px] font-black text-slate-500 uppercase tracking-widest select-none font-mono">
+                        <span className="col-span-1 text-center">LVL</span>
+                        <span className="col-span-3 text-center">UPGRADE COST</span>
+                        <span className="col-span-3 text-center font-black text-white">DAMAGE (DMG)</span>
+                        <span className="col-span-2 text-center">COOLDOWN</span>
+                        <span className="col-span-2 text-center">RADIUS (RANGE)</span>
+                        <span className="col-span-1 text-right"></span>
+                      </div>
+
+                      <div className="divide-y divide-white/5 overflow-y-auto scrollbar-thin max-h-[45vh]">
+                        {tempUpgradesList.map((upgrade, index) => (
+                          <div key={index} className="grid grid-cols-12 gap-1 px-4 py-2 items-center hover:bg-white/[0.01]">
+                            <div className="col-span-1 text-center text-xs font-black font-mono text-white">
+                              {upgrade.lvl}
+                            </div>
+                            <div className="col-span-3 px-1">
+                              <input
+                                type="text"
+                                value={upgrade.cost}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].cost = e.target.value;
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs font-semibold text-white focus:outline-none focus:border-blue-500 font-mono"
+                              />
+                            </div>
+                            <div className="col-span-3 px-1">
+                              <input
+                                type="number"
+                                placeholder="Dmg"
+                                value={typeof upgrade.dmg === "number" ? upgrade.dmg : ""}
+                                onChange={e => {
+                                  const val = Number(e.target.value);
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].dmg = isNaN(val) ? undefined : val;
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-white/10 focus:border-blue-400 rounded-lg py-1 px-2 text-center text-xs text-white focus:outline-none font-mono font-bold"
+                              />
+                            </div>
+                            <div className="col-span-2 px-1">
+                              <input
+                                type="number"
+                                step="0.01"
+                                placeholder="CD"
+                                value={upgrade.cd || ""}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].cd = Number(e.target.value);
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                              />
+                            </div>
+                            <div className="col-span-2 px-1">
+                              <input
+                                type="number"
+                                placeholder="Range"
+                                value={upgrade.range || ""}
+                                onChange={e => {
+                                  const updated = [...tempUpgradesList];
+                                  updated[index].range = Number(e.target.value);
+                                  setTempUpgradesList(updated);
+                                }}
+                                className="w-full bg-black/60 border border-white/10 rounded-lg py-1 px-2 text-center text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                              />
+                            </div>
+                            <div className="col-span-1 text-right">
+                              {tempUpgradesList.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = tempUpgradesList.filter((_, idx) => idx !== index).map((u, i) => ({
+                                      ...u,
+                                      lvl: i + 1,
+                                      cost: i === 0 ? "Place" : u.cost === "Place" ? "$1000" : u.cost
+                                    }));
+                                    setTempUpgradesList(updated);
+                                  }}
+                                  className="text-rose-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded cursor-pointer transition flex items-center justify-center mx-auto"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex gap-2 justify-end mt-2">

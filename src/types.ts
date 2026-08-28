@@ -1,11 +1,16 @@
 export interface Upgrade {
   lvl: number;
   cost: string;
-  dmg?: number;
+  dmg?: number | string;
   cd?: number;
   range?: number;
   hp?: number;
   income?: number;
+  // 3 Booster Buff categories
+  dmgBuff?: string;   // Damage Buff (e.g. "+25%" or "25%")
+  rangeBuff?: string; // Range Buff (e.g. "+15%" or "15%")
+  speedBuff?: string; // Attack Speed Buff (e.g. "+20%" or "20%")
+  buff?: string;      // General buff
 }
 
 export interface CrateDrop {

@@ -397,34 +397,54 @@ let globalClickSoundUrl = dbState.globalClickSoundUrl || "";
 const demoUnitNames = new Set([
   "Chef Cameraman", "Community Cameraman", "Upgraded Fire King",
   "Upgraded Titan Speakerman", "Secret Agent", "Watchman of Darkness",
-  "Demon Plunger", "G-Toilet 5.0", "Holiday Blizzard"
+  "Demon Plunger", "G-Toilet 5.0", "Holiday Blizzard", "Summer Crate"
 ]);
 
 function cleanAndSyncUnits() {
+  const normalize = (name: string) => (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
   if (!dbState.units || !Array.isArray(dbState.units) || dbState.units.length === 0) {
     dbState.units = [...defaultUnits];
   } else {
     dbState.units = dbState.units.filter((u: any) => u && u.name && !demoUnitNames.has(u.name));
+    
+    // Sync or add default units using normalized name matching
     defaultUnits.forEach(defUnit => {
-      const idx = dbState.units.findIndex((u: any) => u.name === defUnit.name);
+      const defNorm = normalize(defUnit.name);
+      const idx = dbState.units.findIndex((u: any) => normalize(u.name) === defNorm);
       if (idx === -1) {
         dbState.units.push(defUnit);
       } else {
-        // Preserve user edited values (gems, stability, demand, upgrades), only backfill missing metadata
-        if (defUnit.crateDrops && (!dbState.units[idx].crateDrops || dbState.units[idx].crateDrops.length === 0)) {
-          dbState.units[idx].crateDrops = defUnit.crateDrops;
-        }
-        if (!dbState.units[idx].img) {
-          dbState.units[idx].img = defUnit.img;
-        }
-        if (!dbState.units[idx].obtain) {
-          dbState.units[idx].obtain = defUnit.obtain;
-        }
-        if (!dbState.units[idx].rarity) {
-          dbState.units[idx].rarity = defUnit.rarity;
-        }
+        // Sync latest official baseline values and upgrades if matched
+        dbState.units[idx] = {
+          ...dbState.units[idx],
+          name: defUnit.name,
+          gems: defUnit.gems,
+          demand: defUnit.demand,
+          stability: defUnit.stability,
+          tokenValue: defUnit.tokenValue,
+          shinyValue: defUnit.shinyValue,
+          placeCost: defUnit.placeCost,
+          img: defUnit.img || dbState.units[idx].img,
+          obtain: defUnit.obtain || dbState.units[idx].obtain,
+          rarity: defUnit.rarity || dbState.units[idx].rarity,
+          upgrades: defUnit.upgrades || dbState.units[idx].upgrades,
+          crateDrops: defUnit.crateDrops || dbState.units[idx].crateDrops
+        };
       }
     });
+
+    // Deduplicate units by normalized name (keeping first occurrence)
+    const seen = new Set<string>();
+    const deduplicated: any[] = [];
+    for (const u of dbState.units) {
+      const norm = normalize(u.name);
+      if (!seen.has(norm)) {
+        seen.add(norm);
+        deduplicated.push(u);
+      }
+    }
+    dbState.units = deduplicated;
   }
 
   const getRarityIndex = (rarity: string): number => {
@@ -988,6 +1008,22 @@ export const initPromise = (async () => {
     logAdminAction(user.displayName || user.name, "Update Music URL", globalMusicUrl || "Muted/Custom Track");
     persistState();
     res.json({ success: true, globalMusicUrl });
+  });
+
+  // Google Search Console Site Verification & Sitemap
+  app.get("/google35511c6addec1b1b.html", (req, res) => {
+    res.setHeader("Content-Type", "text/html");
+    res.send("google-site-verification: google35511c6addec1b1b.html");
+  });
+
+  app.get("/sitemap.xml", (req, res) => {
+    const sitemapPath = path.join(process.cwd(), "public", "sitemap.xml");
+    if (fs.existsSync(sitemapPath)) {
+      res.setHeader("Content-Type", "application/xml");
+      res.sendFile(sitemapPath);
+    } else {
+      res.status(404).send("Sitemap not found");
+    }
   });
 
   // Dynamic Units Endpoints

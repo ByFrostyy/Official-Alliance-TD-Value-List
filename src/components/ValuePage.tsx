@@ -329,7 +329,8 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
   const getUpgradesList = (unit: Unit) => {
     if (!unit.upgrades) return [];
     return unit.upgrades.map(lvl => {
-      const dps = lvl.dmg && lvl.cd ? Math.round(lvl.dmg / lvl.cd) : 0;
+      const numDmg = typeof lvl.dmg === "number" ? lvl.dmg : (typeof lvl.dmg === "string" && !isNaN(Number(lvl.dmg)) ? Number(lvl.dmg) : 0);
+      const dps = numDmg && lvl.cd ? Math.round(numDmg / lvl.cd) : 0;
       return { ...lvl, dps };
     });
   };
@@ -346,11 +347,11 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
     const max2 = u2Upgrades.length > 0 ? u2Upgrades[u2Upgrades.length - 1] : null;
 
     // Base stats
-    const u1Dmg = max1 && max1.dmg ? max1.dmg : 0;
-    const u2Dmg = max2 && max2.dmg ? max2.dmg : 0;
+    const u1Dmg = max1 && typeof max1.dmg === "number" ? max1.dmg : 0;
+    const u2Dmg = max2 && typeof max2.dmg === "number" ? max2.dmg : 0;
 
-    const u1Dps = max1 && max1.dmg && max1.cd ? Math.round(max1.dmg / max1.cd) : 0;
-    const u2Dps = max2 && max2.dmg && max2.cd ? Math.round(max2.dmg / max2.cd) : 0;
+    const u1Dps = max1 && u1Dmg && max1.cd ? Math.round(u1Dmg / max1.cd) : 0;
+    const u2Dps = max2 && u2Dmg && max2.cd ? Math.round(u2Dmg / max2.cd) : 0;
 
     const u1Cd = max1 && max1.cd ? Number((max1.cd).toFixed(2)) : 0;
     const u2Cd = max2 && max2.cd ? Number((max2.cd).toFixed(2)) : 0;
@@ -971,7 +972,9 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                     <div className="w-full overflow-x-auto rounded-xl border border-white/5 bg-white/[0.01]">
                       {(() => {
                         const ups = getUpgradesList(detailUnit);
-                        const isIncomeUnit = ups.some(lvl => lvl.income !== undefined) && !ups.some(lvl => lvl.dmg !== undefined && lvl.dmg > 0);
+                        const isIncomeUnit = ups.some(lvl => lvl.income !== undefined) && !ups.some(lvl => (typeof lvl.dmg === "number" && lvl.dmg > 0) || (typeof lvl.dmg === "string" && Number(lvl.dmg) > 0) || lvl.dmgBuff || lvl.rangeBuff || lvl.speedBuff || lvl.buff);
+                        const isBoosterUnit = ups.some(lvl => (lvl.dmgBuff !== undefined && lvl.dmgBuff !== "") || (lvl.rangeBuff !== undefined && lvl.rangeBuff !== "") || (lvl.speedBuff !== undefined && lvl.speedBuff !== "") || (lvl.buff !== undefined && lvl.buff !== ""));
+                        
                         if (isIncomeUnit) {
                           return (
                             <table className="w-full text-left text-[11px] text-slate-300 border-collapse">
@@ -1001,6 +1004,67 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                           );
                         }
 
+                        if (isBoosterUnit) {
+                          return (
+                            <table className="w-full text-left text-[11px] text-slate-300 border-collapse">
+                              <thead>
+                                <tr className="bg-white/5 border-b border-white/10">
+                                  <th className="p-3 font-semibold text-[8px] uppercase text-slate-500">Tier</th>
+                                  <th className="p-3 font-semibold text-[8px] uppercase text-slate-500">Upgrade Cost</th>
+                                  <th className="p-3 font-semibold text-[8px] uppercase text-red-400">⚔️ Dmg Buff</th>
+                                  <th className="p-3 font-semibold text-[8px] uppercase text-blue-400">🎯 Range Buff</th>
+                                  <th className="p-3 font-semibold text-[8px] uppercase text-amber-400">⚡ Atk Spd Buff</th>
+                                  <th className="p-3 font-semibold text-[8px] uppercase text-slate-500">Range</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ups.map((lvl, index) => {
+                                  return (
+                                    <tr key={`booster-ups-${index}`} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
+                                      <td className="p-3 font-black text-white text-xs">Lvl {lvl.lvl}</td>
+                                      <td className="p-3 font-bold text-emerald-400 font-mono">{lvl.cost}</td>
+                                      <td className="p-3">
+                                        {lvl.dmgBuff ? (
+                                          <span className="inline-flex items-center gap-1 font-sans text-xs font-black text-red-300 bg-red-500/15 border border-red-500/30 px-2 py-0.5 rounded-lg shadow-[0_0_8px_rgba(239,68,68,0.2)]">
+                                            ⚔️ {lvl.dmgBuff.startsWith("+") ? lvl.dmgBuff : `+${lvl.dmgBuff}`}
+                                          </span>
+                                        ) : lvl.buff ? (
+                                          <span className="text-purple-300 font-sans text-xs font-black bg-purple-500/15 border border-purple-500/30 px-2 py-0.5 rounded-lg">
+                                            {lvl.buff}
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-600 font-mono">-</span>
+                                        )}
+                                      </td>
+                                      <td className="p-3">
+                                        {lvl.rangeBuff ? (
+                                          <span className="inline-flex items-center gap-1 font-sans text-xs font-black text-blue-300 bg-blue-500/15 border border-blue-500/30 px-2 py-0.5 rounded-lg shadow-[0_0_8px_rgba(59,130,246,0.2)]">
+                                            🎯 {lvl.rangeBuff.startsWith("+") ? lvl.rangeBuff : `+${lvl.rangeBuff}`}
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-600 font-mono">-</span>
+                                        )}
+                                      </td>
+                                      <td className="p-3">
+                                        {lvl.speedBuff ? (
+                                          <span className="inline-flex items-center gap-1 font-sans text-xs font-black text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-lg shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+                                            ⚡ {lvl.speedBuff.startsWith("+") ? lvl.speedBuff : `+${lvl.speedBuff}`}
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-600 font-mono">-</span>
+                                        )}
+                                      </td>
+                                      <td className="p-3 font-medium text-slate-300 font-mono">
+                                        {lvl.range ? <span>{lvl.range}</span> : "-"}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          );
+                        }
+
                         // Combat Unit Upgrades Table
                         return (
                           <table className="w-full text-left text-[11px] text-slate-300 border-collapse">
@@ -1016,7 +1080,8 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                             </thead>
                               <tbody>
                                 {ups.map((lvl, index) => {
-                                  const baseDps = lvl.dmg && lvl.cd ? Math.round(lvl.dmg / lvl.cd) : 0;
+                                  const numDmg = typeof lvl.dmg === "number" ? lvl.dmg : (typeof lvl.dmg === "string" && !isNaN(Number(lvl.dmg)) ? Number(lvl.dmg) : null);
+                                  const baseDps = numDmg && lvl.cd ? Math.round(numDmg / lvl.cd) : 0;
 
                                   return (
                                     <tr key={`combat-ups-${index}`} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
@@ -1048,7 +1113,7 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
                                         )}
                                       </td>
                                       <td className="p-3 font-mono font-black text-slate-200">
-                                        {lvl.dmg && lvl.cd ? (
+                                        {numDmg && lvl.cd ? (
                                           <span>{baseDps.toLocaleString()}</span>
                                         ) : (
                                           "-"
