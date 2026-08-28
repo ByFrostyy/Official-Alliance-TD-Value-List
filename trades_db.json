@@ -6946,9 +6946,7 @@
       "discordId": "1143262388070662285",
       "discordTag": "@vsnnnnn",
       "isAdmin": true,
-      "isSuperAdmin": true,
-      "isDiscord": true,
-      "email": "begzodfaezullaev@gmail.com"
+      "isSuperAdmin": true
     },
     "session_oauth_vw0yhqho7zmt38spz6": {
       "id": 12015604,
@@ -7022,25 +7020,6 @@
       "isDiscord": true,
       "discordId": "1417423996865220609",
       "email": "codersam12345@gmail.com"
-    },
-    "session_oauth_9730jup28cqmtcuws4w": {
-      "id": 11432623,
-      "name": "vsnnnnn",
-      "displayName": "Evil Frosty",
-      "avatar": "https://cdn.discordapp.com/avatars/1143262388070662285/11ccbb6b4c210a37025ebd7ea8255781.png?size=256",
-      "isDiscord": true,
-      "discordId": "1143262388070662285",
-      "email": "begzodfaezullaev@gmail.com"
-    },
-    "session_admin_dn1x3wrxhoemtcuwu4t": {
-      "id": 11432623,
-      "name": "vsnnnnn",
-      "displayName": "Evil Frosty",
-      "avatar": "https://cdn.discordapp.com/avatars/1143262388070662285/11ccbb6b4c210a37025ebd7ea8255781.png?size=256",
-      "discordId": "1143262388070662285",
-      "discordTag": "@vsnnnnn",
-      "isAdmin": true,
-      "isSuperAdmin": true
     }
   },
   "maintenanceModeActive": false,
@@ -9130,7 +9109,7 @@
       "gems": 0,
       "demand": 5,
       "stability": "Stable",
-      "img": "https://i.postimg.cc/MGjsYrkV/dsadsad.png",
+      "img": "https://i.postimg.cc/QdX5f3zS/image.png",
       "placeCost": 0,
       "obtain": "Free Daily Reward",
       "upgrades": [
@@ -9174,7 +9153,7 @@
       "gems": 50,
       "demand": 8,
       "stability": "Stable",
-      "img": "https://i.postimg.cc/13RhJSMn/cd4eca2771f66a3b.png",
+      "img": "https://i.postimg.cc/gky8yJgR/image.png",
       "placeCost": 0,
       "obtain": "Party Event Quests & Rewards",
       "upgrades": [
@@ -9218,7 +9197,7 @@
       "gems": 100,
       "demand": 7,
       "stability": "Stable",
-      "img": "https://i.postimg.cc/MGjsYrkV/dsadsad.png",
+      "img": "https://i.postimg.cc/QdX5f3zS/image.png",
       "placeCost": 0,
       "obtain": "Shop / Summon",
       "upgrades": [
@@ -9725,13 +9704,6 @@
     }
   ],
   "adminAuditLogs": [
-    {
-      "id": "audit_1787915812493_9wys",
-      "timestamp": "2026-08-28T11:16:52.493Z",
-      "adminName": "Evil Frosty",
-      "action": "Admin Login",
-      "details": "Logged into panel with Discord as @vsnnnnn (Evil Frosty)"
-    },
     {
       "id": "audit_1787342322018_rsg0",
       "timestamp": "2026-08-21T19:58:42.018Z",
