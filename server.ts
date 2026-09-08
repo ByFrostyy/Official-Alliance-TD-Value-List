@@ -62,7 +62,7 @@ try {
   firestoreDb = null;
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 const DB_FILE = process.env.DATA_DIR 
   ? path.join(process.env.DATA_DIR, "trades_db.json") 
   : (process.env.DB_FILE_PATH || path.join(process.cwd(), "trades_db.json"));
@@ -428,9 +428,21 @@ function cleanAndSyncUnits() {
           img: defUnit.img || dbState.units[idx].img,
           obtain: defUnit.obtain || dbState.units[idx].obtain,
           rarity: defUnit.rarity || dbState.units[idx].rarity,
-          upgrades: defUnit.upgrades || dbState.units[idx].upgrades,
-          crateDrops: defUnit.crateDrops || dbState.units[idx].crateDrops
+          upgrades: defUnit.upgrades || dbState.units[idx].upgrades
         };
+        if (defUnit.rarity === "Crate" || defUnit.name.toLowerCase().includes("crate")) {
+          dbState.units[idx].crateDrops = defUnit.crateDrops || dbState.units[idx].crateDrops;
+        } else {
+          delete dbState.units[idx].crateDrops;
+        }
+      }
+    });
+
+    // Remove crateDrops from any unit whose rarity is not Crate
+    dbState.units.forEach((u: any) => {
+      const isCrate = (u.rarity || "").toLowerCase() === "crate" || (u.name || "").toLowerCase().includes("crate");
+      if (!isCrate && u.crateDrops) {
+        delete u.crateDrops;
       }
     });
 
@@ -576,10 +588,10 @@ defaultForbidden.forEach(word => {
 // Explicitly filter out "67" if present in loaded database state
 forbiddenWordsList = forbiddenWordsList.filter(w => w !== "67");
 
+let isFirestoreLoaded = false;
+
 // Persist seeded words back to database file
 persistState();
-
-let isFirestoreLoaded = false;
 
 async function saveDbToFirestore() {
   if (!firestoreDb || !isFirestoreLoaded) {
@@ -761,6 +773,9 @@ export const app = express();
 
 export const initPromise = (async () => {
   await loadDbFromFirestore();
+
+  cleanAndSyncUnits();
+  cleanAndSyncSignatures();
 
   // Self-healing / Automatic update for user requested "Update Log" and "Countdown"
   dbState.updateLogs = [...defaultUpdateLogs];
@@ -1067,7 +1082,16 @@ export const initPromise = (async () => {
       return (Number(a.gems) || 0) - (Number(b.gems) || 0);
     });
 
-    dbState.units = sorted;
+    const sanitized = sorted.map((u: any) => {
+      const isCrate = (u.rarity || "").toLowerCase() === "crate" || (u.name || "").toLowerCase().includes("crate");
+      if (!isCrate && u.crateDrops) {
+        const { crateDrops, ...rest } = u;
+        return rest;
+      }
+      return u;
+    });
+
+    dbState.units = sanitized;
     logAdminAction(user.displayName || user.name, "Update Units Database", `Saved ${sorted.length} total units`);
     persistState();
     res.json({ success: true, units: dbState.units });

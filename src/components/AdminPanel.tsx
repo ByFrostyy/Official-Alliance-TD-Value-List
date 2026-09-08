@@ -1257,7 +1257,7 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
       placeCost: Number(newUnitPlaceCost) || 0,
       obtain: newUnitObtain.trim() || "Summon",
       upgrades: newUnitUpgrades,
-      ...(newUnitRarity === "Crate" || newUnitCrateDrops.length > 0 ? { crateDrops: newUnitCrateDrops } : {})
+      ...(newUnitRarity === "Crate" ? { crateDrops: newUnitCrateDrops } : {})
     };
 
     const updated = [newUnit, ...units];
@@ -2613,7 +2613,7 @@ export function AdminPanel({ isOpen, onClose, onRefreshData, onLogout }: AdminPa
                       {filteredUnits.map((u, idx) => {
                         // Find original index in source array
                         const originalIndex = units.findIndex(original => original.name === u.name);
-                        const isCrateUnit = u.rarity.toLowerCase() === "crate" || (u.crateDrops && u.crateDrops.length > 0) || u.name.toLowerCase().includes("crate");
+                        const isCrateUnit = u.rarity.toLowerCase() === "crate" || u.name.toLowerCase().includes("crate");
 
                         return (
                           <div key={u.name} className="flex items-center px-4 py-3 hover:bg-white/[0.02] transition">

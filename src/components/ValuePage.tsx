@@ -246,7 +246,7 @@ export default function ValuePage({ units: propUnits }: { units?: Unit[] }) {
   // Crate drops calculations
   const crateLoot = useMemo(() => {
     if (!detailUnit) return null;
-    const isCrate = detailUnit.rarity.toLowerCase() === "crate" || detailUnit.name.toLowerCase().includes("crate") || (detailUnit.crateDrops && detailUnit.crateDrops.length > 0);
+    const isCrate = detailUnit.rarity.toLowerCase() === "crate" || detailUnit.name.toLowerCase().includes("crate");
     if (!isCrate) return null;
 
     if (detailUnit.crateDrops && detailUnit.crateDrops.length > 0) {
